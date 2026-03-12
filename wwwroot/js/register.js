@@ -1,4 +1,5 @@
 (function () {
+  const pendingVerificationKey = "pendingEmailVerification";
   const form = document.getElementById("registerForm");
   if (!form) {
     return;
@@ -76,7 +77,13 @@
   };
 
   const mapServerFieldToClientField = (fieldName) => {
-    const normalized = fieldName.toLowerCase();
+    const normalized = String(fieldName || "")
+      .trim()
+      .replace(/^\$\./, "")
+      .split(".")
+      .pop()
+      .replace(/\[|\]/g, "")
+      .toLowerCase();
     switch (normalized) {
       case "username":
         return "username";
@@ -93,6 +100,36 @@
       default:
         return "";
     }
+  };
+
+  const savePendingVerification = (registerData, fallbackEmail) => {
+    const email = String(registerData?.email || fallbackEmail || "")
+      .trim()
+      .toLowerCase();
+
+    if (!email) {
+      return "";
+    }
+
+    const payload = {
+      email,
+      userId: registerData?.userId ?? null,
+      username: registerData?.username ?? "",
+      fullName: registerData?.fullName ?? "",
+      createdAt: registerData?.createdAt ?? null,
+      otpDispatched: registerData?.otpDispatched ?? null,
+      otpExpiresAt: registerData?.otpExpiresAt ?? null,
+      message: registerData?.message ?? "",
+      savedAt: new Date().toISOString(),
+    };
+
+    try {
+      sessionStorage.setItem(pendingVerificationKey, JSON.stringify(payload));
+    } catch (error) {
+      console.warn("cannot_save_pending_verification", error);
+    }
+
+    return email;
   };
 
   form.addEventListener("submit", async (event) => {
@@ -124,19 +161,28 @@
       });
 
       const contentType = response.headers.get("content-type") || "";
-      const data = contentType.includes("application/json")
-        ? await response.json()
+      const data = contentType.toLowerCase().includes("json")
+        ? await response.json().catch(() => null)
         : null;
 
       if (!response.ok) {
-        if (response.status === 400 && data?.errors) {
-          for (const [fieldName, messages] of Object.entries(data.errors)) {
-            const clientField = mapServerFieldToClientField(fieldName);
-            if (clientField) {
-              setFieldError(clientField, Array.isArray(messages) ? messages[0] : String(messages));
+        if (response.status === 400) {
+          if (data?.errors && typeof data.errors === "object") {
+            for (const [fieldName, messages] of Object.entries(data.errors)) {
+              const clientField = mapServerFieldToClientField(fieldName);
+              if (clientField) {
+                setFieldError(clientField, Array.isArray(messages) ? messages[0] : String(messages));
+              }
             }
+
+            setMessage(data.title || "Thông tin đăng ký chưa hợp lệ.", false);
+            return;
           }
-          setMessage("Thông tin đăng ký chưa hợp lệ.", false);
+
+          setMessage(
+            data?.message || data?.title || data?.detail || "Đăng ký thất bại. Vui lòng thử lại.",
+            false
+          );
           return;
         }
 
@@ -149,11 +195,21 @@
         return;
       }
 
+      const emailForVerification = savePendingVerification(data, payload.email);
       form.reset();
-      setMessage("Đăng ký thành công. Đang chuyển sang trang đăng nhập...", true);
+      setMessage(
+        data?.message || "Đăng ký thành công. Đang chuyển sang trang xác thực OTP...",
+        true
+      );
+
       window.setTimeout(() => {
-        window.location.href = "login.html";
-      }, 1200);
+        if (emailForVerification) {
+          window.location.href = `otp.html?email=${encodeURIComponent(emailForVerification)}`;
+          return;
+        }
+
+        window.location.href = "otp.html";
+      }, 900);
     } catch (error) {
       console.error("register_failed", error);
       setMessage("Không thể kết nối tới máy chủ.", false);

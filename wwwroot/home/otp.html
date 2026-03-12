@@ -158,6 +158,34 @@
         margin-bottom: 32px;
       }
 
+      .verify-email {
+        font-size: 13.5px;
+        margin: -18px 0 18px;
+        color: #c7d6e6;
+      }
+
+      .verify-email strong {
+        color: #ffffff;
+      }
+
+      .status-message {
+        min-height: 20px;
+        margin-bottom: 16px;
+        font-size: 13.5px;
+      }
+
+      .status-message.info {
+        color: #84a6d5;
+      }
+
+      .status-message.success {
+        color: #58c782;
+      }
+
+      .status-message.error {
+        color: #f29ea8;
+      }
+
       /* OTP */
       .otp-row {
         display: flex;
@@ -272,6 +300,8 @@
       <div class="card">
         <h1>Xác thực OTP</h1>
         <p>Nhập mã 6 số vừa được gửi đến email của bạn</p>
+        <p class="verify-email" id="verifyEmail"></p>
+        <p class="status-message info" id="otpStatus" role="status" aria-live="polite"></p>
 
         <div class="otp-row" id="otpRow"></div>
 
@@ -286,186 +316,6 @@
 
     <footer>© 2026 AI Study</footer>
 
-    <script>
-      // ── Build 6 read-only display boxes + hidden real input ──
-      const LENGTH = 6;
-      const row = document.getElementById("otpRow");
-      const confirmBtn = document.getElementById("confirmBtn");
-
-      // We use a hidden <input> to capture real keyboard events,
-      // and render digits into visible display boxes ourselves.
-      const boxes = [];
-      for (let i = 0; i < LENGTH; i++) {
-        const box = document.createElement("div");
-        box.className = "otp-input";
-        box.setAttribute("tabindex", "0");
-        box.setAttribute("role", "textbox");
-        box.setAttribute("aria-label", `Số ${i + 1}`);
-        row.appendChild(box);
-        boxes.push(box);
-      }
-
-      // Internal digit store
-      const digits = Array(LENGTH).fill("");
-      let activeIndex = 0;
-
-      function render() {
-        boxes.forEach((box, i) => {
-          box.textContent = digits[i];
-          box.classList.toggle("has-value", digits[i] !== "");
-          box.classList.toggle("focused", i === activeIndex);
-        });
-        // Sync focus styling
-        boxes.forEach((b) => b.style.removeProperty("border-color"));
-        if (boxes[activeIndex]) {
-          boxes[activeIndex].style.borderColor = "var(--accent)";
-          boxes[activeIndex].style.background = "#1e2f44";
-          boxes[activeIndex].style.boxShadow = "0 0 0 3px var(--accent-glow)";
-          boxes[activeIndex].style.transform = "translateY(-2px) scale(1.04)";
-        }
-        // reset non-active
-        boxes.forEach((b, i) => {
-          if (i !== activeIndex) {
-            b.style.removeProperty("background");
-            b.style.removeProperty("box-shadow");
-            b.style.removeProperty("transform");
-            if (digits[i]) b.style.borderColor = "rgba(59,127,245,0.5)";
-            else b.style.removeProperty("border-color");
-          }
-        });
-        confirmBtn.disabled = digits.some((d) => d === "");
-      }
-
-      function focusBox(i) {
-        activeIndex = Math.max(0, Math.min(LENGTH - 1, i));
-        render();
-        // keep keyboard listener on the container
-        row.focus({ preventScroll: true });
-      }
-
-      // Click a box → focus it
-      boxes.forEach((box, i) => {
-        box.addEventListener("mousedown", (e) => {
-          e.preventDefault();
-          focusBox(i);
-        });
-      });
-
-      // All keyboard input goes to the row div
-      row.setAttribute("tabindex", "0");
-      row.style.outline = "none";
-
-      row.addEventListener("keydown", (e) => {
-        if (e.key === "ArrowLeft") {
-          e.preventDefault();
-          focusBox(activeIndex - 1);
-          return;
-        }
-        if (e.key === "ArrowRight") {
-          e.preventDefault();
-          focusBox(activeIndex + 1);
-          return;
-        }
-        if (e.key === "Tab") return;
-
-        if (e.key === "Backspace") {
-          e.preventDefault();
-          if (digits[activeIndex] !== "") {
-            // clear current
-            digits[activeIndex] = "";
-          } else if (activeIndex > 0) {
-            // go back and clear
-            activeIndex--;
-            digits[activeIndex] = "";
-          }
-          render();
-          return;
-        }
-
-        if (e.key === "Delete") {
-          e.preventDefault();
-          digits[activeIndex] = "";
-          render();
-          return;
-        }
-
-        // Digit input
-        if (/^\d$/.test(e.key)) {
-          e.preventDefault();
-          digits[activeIndex] = e.key;
-          if (activeIndex < LENGTH - 1) activeIndex++;
-          render();
-          return;
-        }
-
-        e.preventDefault();
-      });
-
-      // Paste support
-      row.addEventListener("paste", (e) => {
-        e.preventDefault();
-        const text = (e.clipboardData || window.clipboardData)
-          .getData("text")
-          .replace(/\D/g, "");
-        if (!text) return;
-        for (let i = 0; i < LENGTH; i++) {
-          digits[i] = text[i] || "";
-        }
-        activeIndex = Math.min(text.length, LENGTH - 1);
-        render();
-      });
-
-      // Focus first box on load
-      window.addEventListener("load", () => {
-        focusBox(0);
-        row.focus();
-      });
-
-      // Also re-focus when clicking anywhere on card
-      document.querySelector(".card").addEventListener("click", () => {
-        row.focus();
-      });
-
-      render();
-
-      // ── Resend countdown ──
-      const resendLink = document.getElementById("resendLink");
-      const resendText = document.getElementById("resendText");
-      let timer = null;
-
-      function startCountdown() {
-        let sec = 60;
-        resendLink.style.pointerEvents = "none";
-        resendLink.style.color = "var(--text-muted)";
-        resendText.textContent = "";
-        resendLink.textContent = `Gửi lại sau ${sec}s`;
-
-        timer = setInterval(() => {
-          sec--;
-          if (sec <= 0) {
-            clearInterval(timer);
-            timer = null;
-            resendLink.textContent = "Gửi lại ngay";
-            resendLink.style.pointerEvents = "";
-            resendLink.style.color = "";
-            resendText.textContent = "Chưa nhận được mã? ";
-          } else {
-            resendLink.textContent = `Gửi lại sau ${sec}s`;
-          }
-        }, 1000);
-      }
-
-      startCountdown();
-
-      resendLink.addEventListener("click", (e) => {
-        e.preventDefault();
-        if (timer) return;
-        digits.fill("");
-        activeIndex = 0;
-        render();
-        row.focus();
-        startCountdown();
-      });
-    </script>
+    <script src="../js/otp.js"></script>
   </body>
 </html>
