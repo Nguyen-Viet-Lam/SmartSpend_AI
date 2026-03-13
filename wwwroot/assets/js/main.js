@@ -1,3 +1,5 @@
+document.documentElement.classList.add("js");
+
 document.addEventListener("DOMContentLoaded", function () {
   const deleteButtons = document.querySelectorAll(".btn-danger");
   deleteButtons.forEach((btn) => {
@@ -20,14 +22,38 @@ document.addEventListener("DOMContentLoaded", function () {
       alert("Thao tác thành công (demo).");
     });
   });
+
+  const passwordInput = document.getElementById("password");
+  const togglePassword = document.getElementById("togglePassword");
+  const eyeOpen = document.getElementById("eyeOpen");
+  const eyeClosed = document.getElementById("eyeClosed");
+
+  if (passwordInput && togglePassword) {
+    togglePassword.addEventListener("click", function () {
+      const isPassword = passwordInput.type === "password";
+      passwordInput.type = isPassword ? "text" : "password";
+
+      if (eyeOpen && eyeClosed) {
+        eyeOpen.style.display = isPassword ? "none" : "block";
+        eyeClosed.style.display = isPassword ? "block" : "none";
+      }
+    });
+  }
 });
 
 window.addEventListener("load", function () {
   const loader = document.getElementById("page-loader");
   const content = document.querySelector(".page-content");
 
-  setTimeout(() => {
-    if (loader) loader.classList.add("hide");
-    if (content) content.classList.add("show");
-  }, 1500);
+  if (content) {
+    requestAnimationFrame(() => {
+      content.classList.add("show");
+    });
+  }
+
+  if (loader) {
+    setTimeout(() => {
+      loader.classList.add("hide");
+    }, 1200);
+  }
 });

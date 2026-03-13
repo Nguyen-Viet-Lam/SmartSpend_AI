@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Wed_Project.Models;
 
@@ -11,9 +12,11 @@ using Wed_Project.Models;
 namespace Wed_Project.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260310132820_AddRegisterUserConstraints")]
+    partial class AddRegisterUserConstraints
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -303,66 +306,6 @@ namespace Wed_Project.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Wed_Project.Models.EmailVerificationOtp", b =>
-                {
-                    b.Property<int>("OtpId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OtpId"));
-
-                    b.Property<int>("AttemptCount")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsUsed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("OtpHash")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<string>("OtpSalt")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<string>("Purpose")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<string>("RequestedIp")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<DateTime?>("UsedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("OtpId");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("Email", "Purpose", "IsUsed", "ExpiresAt");
-
-                    b.ToTable("EmailVerificationOtps");
-                });
-
             modelBuilder.Entity("Wed_Project.Models.GuestSession", b =>
                 {
                     b.Property<int>("GuestSessionId")
@@ -644,9 +587,6 @@ namespace Wed_Project.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
-                    b.Property<bool>("IsEmailVerified")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsLocked")
                         .HasColumnType("bit");
 
@@ -779,16 +719,6 @@ namespace Wed_Project.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("GuestSession");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Wed_Project.Models.EmailVerificationOtp", b =>
-                {
-                    b.HasOne("Wed_Project.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("User");
                 });
