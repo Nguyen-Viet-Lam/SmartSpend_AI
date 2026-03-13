@@ -895,10 +895,10 @@
   <body>
     <nav id="navbar">
       <div class="nav-inner">
-        <a class="brand" href="index.html"
-          ><div class="brand-dot"></div>
-          AI Study</a
-        >
+        <a class="brand" href="index.html">
+          <span class="brand-dot"></span>
+          AI Study
+        </a>
         <ul class="nav-links">
           <li><a href="index.html" class="active">Trang chủ</a></li>
           <li><a href="guide.html">Hướng dẫn</a></li>
@@ -930,15 +930,16 @@
               đề thủ công.
             </p>
             <div class="hero-cta">
-              <a href="upload.html" class="btn-cta-primary"
-                >Dùng thử ngay
+              <a href="upload.html" class="btn-cta-primary">
+                Dùng thử ngay
                 <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
                   <path
                     stroke="currentColor"
                     stroke-width="2"
                     d="M5 12h14M13 6l6 6-6 6"
-                  /></svg
-              ></a>
+                  />
+                </svg>
+              </a>
               <a href="dashboard.html" class="btn-cta-secondary"
                 >Vào Dashboard</a
               >
@@ -1082,6 +1083,7 @@
         },
         { threshold: 0.12 },
       );
+
       reveals.forEach((el) => io.observe(el));
     </script>
   </body>
