@@ -12,8 +12,25 @@
   const loginButton = document.getElementById("loginButton");
   const alertBox = document.getElementById("alertBox");
   const alertMsg = document.getElementById("alertMsg");
-  let returnUrl = "index.html";
+  let returnUrl = "/home/index.html";
   let isSubmitting = false;
+
+  const normalizeReturnUrl = (value) => {
+    const raw = String(value || "").trim();
+    if (!raw) {
+      return "/home/index.html";
+    }
+
+    if (!raw.startsWith("/") || raw.startsWith("//")) {
+      return "/home/index.html";
+    }
+
+    if (raw.startsWith("/home/login.html")) {
+      return "/home/index.html";
+    }
+
+    return raw;
+  };
 
   const setMessage = (message, isSuccess) => {
     if (!alertBox || !alertMsg) {
@@ -101,7 +118,7 @@
     const requestedReturn = (query.get("returnUrl") || "").trim();
 
     if (requestedReturn) {
-      returnUrl = requestedReturn;
+      returnUrl = normalizeReturnUrl(requestedReturn);
     }
 
     if (identifierInput && email) {
@@ -116,18 +133,6 @@
     if (notice) {
       setMessage(notice, false);
     }
-  };
-
-  const redirectIfAlreadyLoggedIn = () => {
-    const hasToken =
-      !!window.localStorage.getItem(tokenStorageKey) ||
-      !!window.sessionStorage.getItem(tokenStorageKey);
-
-    if (!hasToken) {
-      return;
-    }
-
-    window.location.href = returnUrl || "index.html";
   };
 
   const handleLogin = async () => {
@@ -218,7 +223,7 @@
       window.sessionStorage.removeItem("pendingEmailVerification");
       setMessage("Đăng nhập thành công. Đang chuyển trang...", true);
       window.setTimeout(() => {
-        window.location.href = returnUrl || "index.html";
+        window.location.href = returnUrl || "/home/index.html";
       }, 700);
     } catch (error) {
       console.error("login_failed", error);
@@ -243,6 +248,5 @@
   }
 
   prefillFromQuery();
-  redirectIfAlreadyLoggedIn();
   setupPasswordToggle();
 })();
