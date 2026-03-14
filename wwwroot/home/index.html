@@ -1161,7 +1161,7 @@
           <li><a href="/home/guide.html">Hướng dẫn</a></li>
           <li><a href="/home/pricing.html">Gói sử dụng</a></li>
         </ul>
-        <div class="nav-actions">
+        <div class="nav-actions" data-auth-guest>
           <a class="btn btn-ghost" href="/home/login.html">Đăng nhập</a>
           <a class="btn btn-lime" href="/home/register.html">Đăng ký miễn phí</a>
         </div>
@@ -1452,7 +1452,7 @@
                 nhiều lần
               </li>
             </ul>
-            <a href="/home/register.html" class="role-cta cta-lime"
+            <a href="/home/register.html" class="role-cta cta-lime" data-auth-guest
               >Đăng ký miễn phí →</a
             >
           </div>
@@ -1491,7 +1491,7 @@
                 vi phạm
               </li>
             </ul>
-            <a href="/home/login.html" class="role-cta cta-purple"
+            <a href="/home/login.html" class="role-cta cta-purple" data-auth-guest
               >Đăng nhập Admin →</a
             >
           </div>
@@ -1511,8 +1511,8 @@
           <div class="footer-links">
             <a href="/home/guide.html">Hướng dẫn</a>
             <a href="/home/pricing.html">Gói sử dụng</a>
-            <a href="/home/register.html">Đăng ký</a>
-            <a href="/home/login.html">Đăng nhập</a>
+            <a href="/home/register.html" data-auth-guest>Đăng ký</a>
+            <a href="/home/login.html" data-auth-guest>Đăng nhập</a>
           </div>
           <div class="footer-copy">Bootstrap 5 + CSS thuần</div>
         </div>
