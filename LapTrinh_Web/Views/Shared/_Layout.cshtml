@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SmartSpend AI</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/LapTrinh_Web.styles.css" asp-append-version="true" />
+</head>
+<body class="app-root">
+    @{
+        var path = Context.Request.Path.Value?.ToLowerInvariant() ?? "/";
+        var isAuthPage = path.StartsWith("/auth");
+    }
+
+    <header class="web-header">
+        <div class="web-shell">
+            <div class="web-top">
+                <a class="brand-mark" asp-controller="Home" asp-action="Index">SmartSpend AI</a>
+                <p class="web-subtitle">Quan ly thu chi thong minh - giao dien web lay cam hung tu mobile finance</p>
+                <button id="themeToggle" class="theme-toggle" type="button">Dark</button>
+            </div>
+            <nav class="web-nav">
+                <a class="nav-link" data-nav-match="/" asp-controller="Home" asp-action="Index">Home</a>
+                <a class="nav-link" data-nav-match="/Auth" asp-controller="Auth" asp-action="Login">Auth</a>
+                <a class="nav-link" data-nav-match="/Dashboard" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                <a class="nav-link" data-nav-match="/Transactions" asp-controller="Transactions" asp-action="Index">Transactions</a>
+                <a class="nav-link" data-nav-match="/Wallet" asp-controller="Wallet" asp-action="Index">Wallet</a>
+                <a class="nav-link" data-nav-match="/Admin" asp-controller="Admin" asp-action="Index">Admin</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="web-shell app-layout @(isAuthPage ? "auth-layout" : string.Empty)">
+        @if (!isAuthPage)
+        {
+            <aside class="side-panel">
+                <article class="smart-card side-card">
+                    <h3>Bo mau</h3>
+                    <p>Xanh ngoc, bo tròn lon, tab pill, card boi canh tai chinh ca nhan.</p>
+                </article>
+                <article class="smart-card side-card">
+                    <h3>Trang mau</h3>
+                    <div class="quick-links">
+                        <a class="smart-btn soft" asp-controller="Auth" asp-action="Login">Login</a>
+                        <a class="smart-btn soft" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                    </div>
+                </article>
+            </aside>
+        }
+
+        <main class="app-main" role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="web-footer">
+        <div class="web-shell">
+            <span>SmartSpend AI UI Prototype (Static)</span>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/app/core/theme-manager.js" asp-append-version="true"></script>
+    <script src="~/js/app/core/api-client.js" asp-append-version="true"></script>
+    <script src="~/js/app/core/storage.js" asp-append-version="true"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

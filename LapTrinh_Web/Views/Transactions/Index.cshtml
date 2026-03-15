@@ -1,0 +1,86 @@
+@{
+    ViewData["Title"] = "Transactions";
+}
+
+<section class="page-shell">
+    <div class="hero-strip">
+        <p class="eyebrow">Giao dich</p>
+        <h1>Danh sach va Timeline giao dich</h1>
+        <p>Phong cach theo app mobile: bo loc nhanh + fast input + danh sach theo ngay.</p>
+    </div>
+
+    <article class="smart-card">
+        <div class="inline-actions">
+            <button class="smart-btn soft" type="button">Thang 3, 2026</button>
+            <button class="smart-btn soft" type="button">Tat ca</button>
+            <button class="smart-btn soft" type="button">Tien vao</button>
+            <button class="smart-btn soft" type="button">Tien ra</button>
+        </div>
+    </article>
+
+    <div class="transaction-grid">
+        <article class="smart-card">
+            <h2>Fast Input</h2>
+            <form class="fast-form" data-tx-form>
+                <label>Noi dung</label>
+                <input type="text" name="description" placeholder="Vi du: Do xang xe" data-tx-description required />
+
+                <label>So tien</label>
+                <input type="number" name="amount" min="1000" step="1000" placeholder="120000" data-tx-amount required />
+
+                <label>Loai giao dich</label>
+                <select name="transactionType" data-tx-type>
+                    <option value="Expense">Chi tieu</option>
+                    <option value="Income">Thu nhap</option>
+                </select>
+
+                <label>Vi</label>
+                <select name="walletId" data-tx-wallet required>
+                    <option value="">Chon vi...</option>
+                </select>
+
+                <label>Danh muc (AI goi y)</label>
+                <input type="text" name="category" value="" data-tx-category />
+
+                <label>Thoi diem</label>
+                <input type="datetime-local" name="occurredAt" data-tx-occurred />
+
+                <p class="status-text info" data-tx-suggestion>Nhap noi dung de nhan goi y category.</p>
+
+                <div class="inline-actions">
+                    <button type="submit" class="smart-btn">Luu giao dich</button>
+                    <button type="button" class="smart-btn soft" data-tx-reset>Reset</button>
+                </div>
+                <p class="status-text pending" data-tx-status></p>
+            </form>
+        </article>
+
+        <article class="smart-card">
+            <h2>Timeline</h2>
+            <ul class="timeline-list" data-tx-timeline></ul>
+        </article>
+    </div>
+
+    <article class="smart-card">
+        <h2>Lich su giao dich (List)</h2>
+        <div class="table-wrap">
+            <table class="smart-table">
+                <thead>
+                    <tr>
+                        <th>Ngay</th>
+                        <th>Noi dung</th>
+                        <th>Vi</th>
+                        <th>Danh muc</th>
+                        <th>Loai</th>
+                        <th>So tien</th>
+                    </tr>
+                </thead>
+                <tbody data-tx-table></tbody>
+            </table>
+        </div>
+    </article>
+</section>
+
+@section Scripts {
+    <script src="~/js/app/transactions/transactions-page.js" asp-append-version="true"></script>
+}

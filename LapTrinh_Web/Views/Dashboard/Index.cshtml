@@ -1,0 +1,81 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<section class="page-shell">
+    <div class="hero-strip">
+        <p class="eyebrow">Tong quan</p>
+        <h1>Bao cao thu chi</h1>
+        <p>Giao dien mo phong theo app mobile: KPI, donut chart va bien dong thu/chi.</p>
+        <p class="status-text pending" data-dashboard-ready></p>
+    </div>
+
+    <article class="smart-card">
+        <div class="inline-actions">
+            <button class="smart-btn soft" type="button">Thang 3, 2026</button>
+            <button class="smart-btn soft" type="button">VND</button>
+            <button class="smart-btn soft" type="button">Chi tieu</button>
+            <button class="smart-btn soft" type="button">Thu nhap</button>
+        </div>
+    </article>
+
+    <div class="stats-grid">
+        <article class="smart-card stat-card">
+            <p>Tong so du vi</p>
+            <h3 data-kpi-balance>0 d</h3>
+        </article>
+        <article class="smart-card stat-card">
+            <p>Chi 7 ngay</p>
+            <h3 data-kpi-expense>0 d</h3>
+        </article>
+        <article class="smart-card stat-card">
+            <p>Thu 7 ngay</p>
+            <h3 data-kpi-income>0 d</h3>
+        </article>
+        <article class="smart-card stat-card">
+            <p>Du bao cuoi thang</p>
+            <h3 data-kpi-forecast>0 d</h3>
+        </article>
+    </div>
+
+    <div class="dashboard-grid">
+        <article class="smart-card">
+            <h2>Bieu do co cau chi tieu</h2>
+            <div class="wire-chart pie-chart">
+                <canvas id="spendingPieChart" class="chart-canvas"></canvas>
+                <div class="pie-legend" data-pie-legend></div>
+            </div>
+        </article>
+
+        <article class="smart-card">
+            <h2>So sanh Thu / Chi theo thang</h2>
+            <div class="wire-chart bar-chart">
+                <canvas id="incomeExpenseBarChart" class="chart-canvas"></canvas>
+            </div>
+        </article>
+    </div>
+
+    <article class="smart-card">
+        <h2>Ngan sach thang</h2>
+        <div class="budget-item">
+            <span>An uong</span>
+            <strong>2.1/3.0 trieu</strong>
+            <div class="budget-track"><div style="width:70%"></div></div>
+        </div>
+        <div class="budget-item">
+            <span>Di chuyen</span>
+            <strong>1.3/1.5 trieu</strong>
+            <div class="budget-track warn"><div style="width:86%"></div></div>
+        </div>
+        <div class="budget-item">
+            <span>Giai tri</span>
+            <strong>1.0/1.0 trieu</strong>
+            <div class="budget-track danger"><div style="width:100%"></div></div>
+        </div>
+    </article>
+</section>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/app/dashboard/dashboard-page.js" asp-append-version="true"></script>
+}

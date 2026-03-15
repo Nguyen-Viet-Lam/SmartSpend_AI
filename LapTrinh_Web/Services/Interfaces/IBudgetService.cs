@@ -1,0 +1,11 @@
+using LapTrinh_Web.Contracts.Requests.Budgets;
+using LapTrinh_Web.Contracts.Responses.Budgets;
+
+namespace LapTrinh_Web.Services.Interfaces;
+
+public interface IBudgetService
+{
+    Task<IReadOnlyList<BudgetProgressResponse>> GetMonthlyProgressAsync(Guid userId, int year, int month, CancellationToken cancellationToken = default);
+    Task<BudgetProgressResponse> CreateAsync(Guid userId, CreateBudgetRequest request, CancellationToken cancellationToken = default);
+    Task<BudgetProgressResponse> UpdateAsync(Guid userId, Guid budgetId, UpdateBudgetRequest request, CancellationToken cancellationToken = default);
+}

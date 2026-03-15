@@ -1,0 +1,54 @@
+@{
+    ViewData["Title"] = "Register";
+}
+
+<section class="page-shell auth-shell">
+    <div class="hero-strip">
+        <p class="eyebrow">Auth</p>
+        <h1>Dang ky tai khoan moi</h1>
+        <p>Dang ky qua API backend, tao OTP va xac thuc tai khoan qua email.</p>
+    </div>
+
+    <div class="auth-grid">
+        <article class="smart-card">
+            <h2>Tao tai khoan</h2>
+            <form class="auth-form" data-auth-action="register" data-success-message="Dang ky thanh cong. Kiem tra OTP trong email.">
+                <label>Ten hien thi</label>
+                <input name="displayName" type="text" required placeholder="Nguyen Van A" minlength="2" />
+
+                <label>Email</label>
+                <input name="email" type="email" required placeholder="you@gmail.com" autocomplete="email" />
+
+                <label>Mat khau</label>
+                <input name="password" type="password" required placeholder="Toi thieu 8 ky tu" minlength="8" autocomplete="new-password" />
+                <small class="muted-line">Goi y: it nhat 8 ky tu, 1 chu hoa, 1 so.</small>
+
+                <label>Nhap lai mat khau</label>
+                <input name="confirmPassword" type="password" required placeholder="Nhap lai mat khau" minlength="8" autocomplete="new-password" />
+
+                <button class="smart-btn" type="submit">Dang ky ngay</button>
+                <p class="status-text" data-status></p>
+            </form>
+
+            <p class="muted-line">
+                Da co tai khoan?
+                <a asp-controller="Auth" asp-action="Login">Quay ve dang nhap</a>
+            </p>
+        </article>
+
+        <aside class="smart-card accent-card">
+            <h3>Luong xu ly</h3>
+            <ol class="flow-list">
+                <li>User dang ky</li>
+                <li>Backend tao user + hash password</li>
+                <li>He thong sinh OTP va gui email bat dong bo</li>
+                <li>User nhap OTP de kich hoat tai khoan</li>
+            </ol>
+            <a class="ghost-link" asp-controller="Auth" asp-action="Otp">Nhap OTP ngay</a>
+        </aside>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/app/auth/auth-page.js" asp-append-version="true"></script>
+}

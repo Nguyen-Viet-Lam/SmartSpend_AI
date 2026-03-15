@@ -1,0 +1,51 @@
+@{
+    ViewData["Title"] = "Login";
+    var verified = string.Equals(Context.Request.Query["verified"], "1", StringComparison.Ordinal);
+}
+
+<section class="page-shell auth-shell">
+    <div class="hero-strip">
+        <p class="eyebrow">Auth</p>
+        <h1>Dang nhap tai khoan</h1>
+        <p>Dang nhap thong qua API backend va cookie authentication.</p>
+    </div>
+
+    <div class="auth-grid">
+        <article class="smart-card">
+            <h2>Dang nhap</h2>
+            @if (verified)
+            {
+                <p class="status-text success">OTP da xac thuc. Ban co the dang nhap.</p>
+            }
+            <form class="auth-form" data-auth-action="login" data-success-message="Dang nhap thanh cong.">
+                <label>Email</label>
+                <input name="email" type="email" required placeholder="you@gmail.com" autocomplete="email" />
+
+                <label>Mat khau</label>
+                <input name="password" type="password" required placeholder="********" autocomplete="current-password" />
+
+                <button class="smart-btn" type="submit">Dang nhap ngay</button>
+                <p class="status-text" data-status></p>
+            </form>
+
+            <p class="muted-line">
+                Chua co tai khoan?
+                <a asp-controller="Auth" asp-action="Register">Dang ky ngay</a>
+            </p>
+        </article>
+
+        <aside class="smart-card accent-card">
+            <h3>Thong tin</h3>
+            <ul class="check-list">
+                <li>Dang goi API /api/auth/login</li>
+                <li>Neu tai khoan chua verify, he thong se chuyen sang OTP</li>
+                <li>Dang nhap xong se vao Dashboard</li>
+            </ul>
+            <a class="ghost-link" asp-controller="Auth" asp-action="Otp">Di toi Form OTP</a>
+        </aside>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/app/auth/auth-page.js" asp-append-version="true"></script>
+}

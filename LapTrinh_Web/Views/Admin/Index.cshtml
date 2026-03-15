@@ -1,0 +1,68 @@
+@{
+    ViewData["Title"] = "Admin";
+}
+
+<section class="page-shell">
+    <div class="hero-strip">
+        <p class="eyebrow">Cai dat</p>
+        <h1>Quan tri nguoi dung va danh muc</h1>
+        <p>Trang cau hinh he thong co ban: lock/unlock user va CRUD category.</p>
+    </div>
+
+    <div class="admin-grid">
+        <article class="smart-card">
+            <h2>Quan ly User</h2>
+            <div class="table-wrap">
+                <table class="smart-table">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Ten hien thi</th>
+                            <th>Trang thai</th>
+                            <th>Thao tac</th>
+                        </tr>
+                    </thead>
+                    <tbody data-admin-users></tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="smart-card">
+            <h2>Quan ly Category</h2>
+            <form class="fast-form" data-admin-category-form>
+                <input type="hidden" name="id" />
+                <label>Ten danh muc</label>
+                <input type="text" name="name" required placeholder="An uong" />
+                <label>Icon</label>
+                <input type="text" name="icon" placeholder="fa-utensils" />
+                <label>
+                    <input type="checkbox" name="isActive" checked />
+                    Kich hoat
+                </label>
+                <div class="inline-actions">
+                    <button type="submit" class="smart-btn">Luu category</button>
+                    <button type="button" class="smart-btn soft" data-admin-category-reset>Reset</button>
+                </div>
+            </form>
+
+            <div class="table-wrap mt-3">
+                <table class="smart-table">
+                    <thead>
+                        <tr>
+                            <th>Ten</th>
+                            <th>Icon</th>
+                            <th>Trang thai</th>
+                            <th>Thao tac</th>
+                        </tr>
+                    </thead>
+                    <tbody data-admin-categories></tbody>
+                </table>
+            </div>
+            <p class="status-text pending" data-admin-status></p>
+        </article>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/app/admin/admin-page.js" asp-append-version="true"></script>
+}

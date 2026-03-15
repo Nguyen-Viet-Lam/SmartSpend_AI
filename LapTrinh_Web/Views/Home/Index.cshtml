@@ -1,0 +1,44 @@
+@{
+    ViewData["Title"] = "SmartSpend AI";
+}
+
+<section class="page-shell">
+    <div class="hero-strip">
+        <p class="eyebrow">Onboarding</p>
+        <h1>Quan ly tai chinh ca nhan</h1>
+        <p>So hoa thu chi - phan loai thong minh - canh bao ngan sach real-time.</p>
+        <div class="quick-links">
+            <a class="smart-btn" asp-controller="Auth" asp-action="Register">Bat dau ngay</a>
+            <a class="smart-btn ghost" asp-controller="Dashboard" asp-action="Index">Xem tong quan</a>
+        </div>
+    </div>
+
+    <div class="home-grid">
+        <article class="smart-card">
+            <h2>Giai doan 1</h2>
+            <ul class="check-list">
+                <li>EF Core + migration + DB local SQL Server</li>
+                <li>Auth API: register/login/verify OTP</li>
+                <li>Mail OTP async qua queue nen</li>
+            </ul>
+        </article>
+
+        <article class="smart-card">
+            <h2>Giao dien web</h2>
+            <ul class="check-list">
+                <li>Phong cach lay cam hung tu mobile finance app</li>
+                <li>Chuyen doi thanh bo cuc website desktop/tablet</li>
+                <li>Card bo tron, tab pill, chart dashboard</li>
+            </ul>
+        </article>
+
+        <article class="smart-card">
+            <h2>Man hinh chinh</h2>
+            <ul class="check-list">
+                <li>Login / Register / OTP (co validate + loading)</li>
+                <li>Dashboard, Transactions, Wallet, Admin UI-first</li>
+                <li>San sang noi backend chi tiet o sprint tiep</li>
+            </ul>
+        </article>
+    </div>
+</section>

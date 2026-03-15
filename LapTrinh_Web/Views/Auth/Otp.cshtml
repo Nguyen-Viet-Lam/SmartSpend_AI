@@ -1,0 +1,41 @@
+@{
+    ViewData["Title"] = "OTP";
+}
+
+<section class="page-shell auth-shell otp-shell">
+    <div class="hero-strip">
+        <p class="eyebrow">Auth</p>
+        <h1>Xac thuc ma OTP</h1>
+        <p>Nhap OTP do backend gui email de kich hoat tai khoan.</p>
+    </div>
+
+    <article class="smart-card otp-card">
+        <form class="auth-form" data-auth-action="verifyOtp" data-success-message="Xac thuc OTP thanh cong.">
+            <label>Email</label>
+            <input name="email" type="email" required placeholder="you@gmail.com" autocomplete="email" />
+
+            <label>Ma OTP</label>
+            <input name="otpCode" type="text" inputmode="numeric" required placeholder="123456" maxlength="6" pattern="\\d{6}" />
+
+            <button class="smart-btn" type="submit">Xac thuc OTP</button>
+            <p class="status-text" data-status></p>
+        </form>
+
+        <hr />
+
+        <form class="auth-form" data-auth-action="resendOtp" data-success-message="Da gui lai OTP.">
+            <label>Gui lai OTP den email</label>
+            <div class="inline-actions">
+                <input name="email" type="email" required placeholder="you@gmail.com" autocomplete="email" />
+                <button class="smart-btn soft" type="submit">Gui lai OTP</button>
+            </div>
+            <p class="status-text" data-status></p>
+        </form>
+
+        <p class="muted-line">Neu chua nhan OTP, bam Gui lai OTP hoac kiem tra thu muc Spam.</p>
+    </article>
+</section>
+
+@section Scripts {
+    <script src="~/js/app/auth/auth-page.js" asp-append-version="true"></script>
+}

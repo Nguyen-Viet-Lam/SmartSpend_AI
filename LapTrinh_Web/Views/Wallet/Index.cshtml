@@ -1,0 +1,67 @@
+@{
+    ViewData["Title"] = "Wallet";
+}
+
+<section class="page-shell">
+    <div class="hero-strip">
+        <p class="eyebrow">Vi thu chi</p>
+        <h1>Quan ly vi tai chinh</h1>
+        <p>Tao vi, chon loai vi, cap nhat so du. San sang noi API CRUD sau.</p>
+    </div>
+
+    <div class="wallet-grid">
+        <article class="smart-card">
+            <h2>Danh sach vi</h2>
+            <div class="table-wrap">
+                <table class="smart-table">
+                    <thead>
+                        <tr>
+                            <th>Ten vi</th>
+                            <th>Loai</th>
+                            <th>So du</th>
+                            <th>Trang thai</th>
+                            <th>Thao tac</th>
+                        </tr>
+                    </thead>
+                    <tbody data-wallet-table></tbody>
+                </table>
+            </div>
+            <p class="status-text pending" data-wallet-status></p>
+        </article>
+
+        <article class="smart-card">
+            <h2 data-wallet-form-title>Tao vi moi</h2>
+            <form class="fast-form" data-wallet-form>
+                <input type="hidden" name="id" />
+
+                <label>Ten vi</label>
+                <input type="text" name="name" placeholder="Vi tien mat" required />
+
+                <label>Loai vi</label>
+                <select name="walletType">
+                    <option value="Cash">Tien mat</option>
+                    <option value="Bank">Ngan hang</option>
+                    <option value="Savings">Tiet kiem</option>
+                    <option value="Other">Khac</option>
+                </select>
+
+                <label>So du ban dau</label>
+                <input type="number" name="balance" min="0" step="1000" placeholder="5000000" required />
+
+                <label>
+                    <input type="checkbox" name="isActive" checked />
+                    Kich hoat vi
+                </label>
+
+                <div class="inline-actions">
+                    <button type="submit" class="smart-btn">Luu vi</button>
+                    <button type="button" class="smart-btn soft" data-wallet-reset>Reset</button>
+                </div>
+            </form>
+        </article>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/app/wallet/wallet-page.js" asp-append-version="true"></script>
+}
