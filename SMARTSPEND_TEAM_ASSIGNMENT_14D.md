@@ -79,7 +79,7 @@ Updated: 2026-03-16
 | 12 | B | Should | Integration test for automation flows | To do | Automation smoke tests |
 | 12 | C | Must | End-to-end bugfix user/admin flows | To do | Core flow stable |
 | 12 | D | Must | Final responsive pass all key pages | To do | Mobile/tablet final pass |
-| 13 | A | Must | README runbook: local + docker + env + migrate | To do | Clear setup docs |
+| 13 | A | Must | README runbook: local + env + migrate | To do | Clear setup docs |
 | 13 | B | Should | Seed/demo data script for presentation | To do | Demo seed prepared |
 | 13 | C | Must | Demo script flow + record support assets | To do | Demo steps validated |
 | 13 | D | Should | Slide visuals + screenshot assets | To do | Report/slide assets ready |

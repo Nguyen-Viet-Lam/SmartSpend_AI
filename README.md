@@ -45,7 +45,7 @@ Migration reset mới của SmartSpend:
 - File mô tả phạm vi bản khung và phần phát triển sau:
   [SMARTSPEND_SKELETON_SCOPE.md](SMARTSPEND_SKELETON_SCOPE.md)
 
-## Chạy local không dùng Docker
+## Chạy local
 1. Mở SQL Server và đảm bảo kết nối được tới `localhost,1433`.
    Mật khẩu mẫu của repo là `SmartSpend123!`.
 2. Kiểm tra `ConnectionStrings:DefaultConnection` trong `appsettings.json`.
@@ -90,22 +90,6 @@ dotnet run --launch-profile http
   - Username: `demo.smartspend`
   - Password: `Demo123!`
 
-## Chạy bằng Docker
-```powershell
-docker compose up --build
-```
-
-Docker mặc định dùng:
-- SQL Server: `localhost,1433`
-- Database: `SmartSpendDb`
-- User: `sa`
-- Password: `SmartSpend123!`
-
-Sau đó mở:
-- Home: `http://localhost:8080/home/index.html`
-- About: `http://localhost:8080/home/about.html`
-- Guide: `http://localhost:8080/home/guide.html`
-
 ## Page Map
 ### Public
 - `/home/index.html`
@@ -145,7 +129,7 @@ Nguyên nhân:
 
 Cách xử lý:
 1. Không mở link `file+.vscode-resource...` trên browser ngoài.
-2. Chạy app bằng `dotnet run` hoặc `docker compose up`.
+2. Chạy app bằng `dotnet run`.
 3. Mở đúng URL localhost của project.
 
 ### 2. App không lên sau khi `dotnet run`
@@ -161,10 +145,6 @@ Kiểm tra:
 Test-NetConnection localhost -Port 1433
 ```
 Nếu `TcpTestSucceeded = False`, hãy bật lại SQL Server service / TCP port.
-
-Nếu dùng Docker mặc định của repo, hãy chắc chắn bạn đang dùng đúng:
-- `sa / SmartSpend123!`
-- database `SmartSpendDb`
 
 Nếu gặp lỗi kiểu `SQL Server requires encryption but this machine does not support it`, hãy kiểm tra connection string đang có:
 - `Encrypt=False`

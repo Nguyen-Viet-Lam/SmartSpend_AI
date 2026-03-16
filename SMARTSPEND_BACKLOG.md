@@ -41,7 +41,7 @@ Updated: 2026-03-16
 | D-018 | Should | Dev Experience | Development auto-seed + demo accounts + sample finance data | A/B | demo/admin login and seeded wallets, transactions, budgets, alerts |
 | D-019 | Should | QA | API smoke verified | A/C | demo login, admin login, dashboard, wallets, budgets, alerts, admin users |
 | D-020 | Should | QA | Unit tests verified | A/B | `5/5` xUnit tests passed via `dotnet vstest` |
-| D-021 | Must | Docs | README runbook updated | Leader | local run, docker note, seed note, demo credentials |
+| D-021 | Must | Docs | README runbook updated | Leader | local run, seed note, demo credentials |
 
 ## In progress
 
@@ -65,7 +65,7 @@ Updated: 2026-03-16
 | T-006 | Should | Frontend | Transaction timeline view polish | C/D | clearer grouped timeline for history page |
 | T-007 | Should | Frontend | Dark/light mode persistence review | C/D | theme remains stable across pages and reload |
 | T-008 | Should | Cleanup | Remove any remaining `AI Study` naming or stale assets | All | no confusing old domain wording left |
-| T-009 | Must | DevOps | Final docker submission verification | A | fresh docker run reaches app + db correctly |
+| T-009 | Nice | DevOps | Local run verification before handoff | A | fresh local run reaches app + db correctly |
 | T-010 | Must | Delivery | Slide/report/video checklist | All | final presentation package complete |
 
 ## Suggested next sprint
