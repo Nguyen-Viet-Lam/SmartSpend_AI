@@ -10,6 +10,11 @@ namespace Web_Project.Services.Users
             int userId,
             UpdateProfileRequest request,
             CancellationToken cancellationToken);
+
+        Task<UserProfileServiceResult> ChangePasswordAsync(
+            int userId,
+            ChangePasswordRequest request,
+            CancellationToken cancellationToken);
     }
 
     public sealed class UserProfileServiceResult

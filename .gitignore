@@ -4,6 +4,10 @@ obj/
 .vs/
 .vscode/
 .dotnet-cli-home/
+.dotnet/
+.keys/
+artifacts/
+appsettings.Local.json
 *.user
 *.suo
 Thumbs.db

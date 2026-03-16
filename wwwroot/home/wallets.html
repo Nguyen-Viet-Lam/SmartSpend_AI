@@ -1,0 +1,130 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ví | SmartSpend AI</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/auth.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js" defer></script>
+  <script src="/js/app-shell.js" defer></script>
+  <script src="/js/finance-pages.js" defer></script>
+</head>
+<body data-layout="app" data-page="wallets" data-page-title="Quản lý ví">
+  <div class="page-shell">
+    <aside class="app-sidebar" id="appSidebar"></aside>
+    <div class="app-frame">
+      <header class="app-topbar" id="appTopbar"></header>
+      <main class="app-content">
+        <section class="app-section">
+          <div class="summary-grid">
+            <article class="summary-card">
+              <div class="metric-label">Tổng số dư</div>
+              <div class="metric-value" id="walletTotalBalance">--</div>
+            </article>
+            <article class="summary-card">
+              <div class="metric-label">Số lượng ví</div>
+              <div class="metric-value" id="walletCount">0</div>
+            </article>
+            <article class="summary-card">
+              <div class="metric-label">Gói hiện tại</div>
+              <div class="metric-value">Standard User</div>
+              <div class="muted">Mặc định tối đa 3 ví.</div>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <h2>Tạo hoặc chỉnh sửa ví</h2>
+                  <p class="muted">Hỗ trợ ví Tiền mặt, Ngân hàng, Tiết kiệm, Momo.</p>
+                </div>
+              </div>
+              <form id="walletForm" class="form-stack">
+                <div id="walletMessage" class="message" hidden></div>
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="walletName">Tên ví</label>
+                    <input class="input" id="walletName" name="name" required>
+                  </div>
+                  <div class="field">
+                    <label for="walletType">Loại ví</label>
+                    <select class="select" id="walletType" name="type">
+                      <option value="Cash">Tiền mặt</option>
+                      <option value="Bank">Ngân hàng</option>
+                      <option value="Savings">Tiết kiệm</option>
+                      <option value="Momo">Momo</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="walletInitialBalance">Số dư ban đầu</label>
+                    <input class="input" id="walletInitialBalance" name="initialBalance" type="number" min="0" step="1000" value="0">
+                  </div>
+                  <div class="field">
+                    <label class="inline-checkbox" style="margin-top:32px;"><input type="checkbox" id="walletIsDefault" name="isDefault"> Đặt làm ví mặc định</label>
+                  </div>
+                </div>
+                <div class="inline-actions">
+                  <button class="btn btn-primary" type="submit">Lưu ví</button>
+                  <button class="btn btn-secondary" type="button" id="cancelWalletEdit" hidden>Hủy chỉnh sửa</button>
+                </div>
+              </form>
+            </article>
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <h2>Chuyển tiền giữa các ví</h2>
+                  <p class="muted">Dùng cho các thao tác như rút từ ngân hàng sang tiền mặt.</p>
+                </div>
+              </div>
+              <form id="transferForm" class="form-stack">
+                <div id="transferMessage" class="message" hidden></div>
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="fromWalletId">Từ ví</label>
+                    <select class="select" id="fromWalletId" name="fromWalletId"></select>
+                  </div>
+                  <div class="field">
+                    <label for="toWalletId">Sang ví</label>
+                    <select class="select" id="toWalletId" name="toWalletId"></select>
+                  </div>
+                </div>
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="transferAmount">Số tiền</label>
+                    <input class="input" id="transferAmount" name="amount" type="number" min="1" step="1000" required>
+                  </div>
+                  <div class="field">
+                    <label for="transferDate">Ngày chuyển</label>
+                    <input class="input" id="transferDate" name="transferDate" type="date">
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="transferNote">Ghi chú</label>
+                  <input class="input" id="transferNote" name="note">
+                </div>
+                <button class="btn btn-accent" type="submit">Chuyển tiền</button>
+              </form>
+            </article>
+          </div>
+
+          <section>
+            <div class="panel-header">
+              <div>
+                <h2>Danh sách ví</h2>
+                <p class="muted">Tất cả ví hiện có của người dùng hiện tại.</p>
+              </div>
+            </div>
+            <div class="wallet-grid" id="walletList"></div>
+          </section>
+        </section>
+      </main>
+    </div>
+  </div>
+  <div class="app-backdrop" id="appBackdrop"></div>
+  <a class="btn btn-primary fab" href="/home/transactions.html#quick-add">+ Thêm giao dịch</a>
+</body>
+</html>

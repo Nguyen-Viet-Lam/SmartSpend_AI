@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Web_Project.Models;
 using Web_Project.Models.Dtos.User;
+using Web_Project.Security;
 
 namespace Web_Project.Services.Users
 {
@@ -96,6 +97,63 @@ namespace Web_Project.Services.Users
                     CreatedAt = user.CreatedAt
                 }
             };
+        }
+
+        public async Task<UserProfileServiceResult> ChangePasswordAsync(
+            int userId,
+            ChangePasswordRequest request,
+            CancellationToken cancellationToken)
+        {
+            var user = await _dbContext.Users
+                .FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken);
+
+            if (user is null)
+            {
+                return new UserProfileServiceResult
+                {
+                    Success = false,
+                    Message = "Không tìm thấy người dùng."
+                };
+            }
+
+            if (!PasswordHashUtility.VerifyPassword(request.CurrentPassword, user.PasswordHash))
+            {
+                return new UserProfileServiceResult
+                {
+                    Success = false,
+                    Message = "Mật khẩu hiện tại không đúng."
+                };
+            }
+
+            if (!HasStrongPassword(request.NewPassword))
+            {
+                return new UserProfileServiceResult
+                {
+                    Success = false,
+                    Message = "Mật khẩu mới phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường và chữ số."
+                };
+            }
+
+            user.PasswordHash = PasswordHashUtility.HashPassword(request.NewPassword);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            return new UserProfileServiceResult
+            {
+                Success = true,
+                Message = "Đổi mật khẩu thành công."
+            };
+        }
+
+        private static bool HasStrongPassword(string password)
+        {
+            if (string.IsNullOrWhiteSpace(password) || password.Length < 8)
+            {
+                return false;
+            }
+
+            return password.Any(char.IsUpper) &&
+                   password.Any(char.IsLower) &&
+                   password.Any(char.IsDigit);
         }
     }
 }

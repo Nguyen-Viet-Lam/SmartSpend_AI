@@ -12,8 +12,8 @@ namespace Web_Project.Models
 
         public string Password { get; set; } = string.Empty;
 
-        public string FromEmail { get; set; } = "no-reply@aistudy.local";
+        public string FromEmail { get; set; } = "no-reply@smartspend.local";
 
-        public string FromName { get; set; } = "AI Study";
+        public string FromName { get; set; } = "SmartSpend AI";
     }
 }

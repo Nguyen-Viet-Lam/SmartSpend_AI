@@ -5,23 +5,17 @@ namespace Web_Project.Services.Auth
 {
     public interface IAuthService
     {
-        Task<LoginServiceResult> LoginAsync(
-            LoginRequest request,
-            CancellationToken cancellationToken);
+        Task<LoginServiceResult> LoginAsync(LoginRequest request, CancellationToken cancellationToken);
 
-        Task<RegisterServiceResult> RegisterAsync(
-            RegisterRequest request,
-            string requestIp,
-            CancellationToken cancellationToken);
+        Task<RegisterServiceResult> RegisterAsync(RegisterRequest request, string requestIp, CancellationToken cancellationToken);
 
-        Task<OtpVerificationResult> VerifyEmailOtpAsync(
-            VerifyEmailOtpRequest request,
-            CancellationToken cancellationToken);
+        Task<OtpVerificationResult> VerifyEmailOtpAsync(VerifyEmailOtpRequest request, CancellationToken cancellationToken);
 
-        Task<OtpDispatchResult> ResendEmailOtpAsync(
-            ResendEmailOtpRequest request,
-            string requestIp,
-            CancellationToken cancellationToken);
+        Task<OtpDispatchResult> ResendEmailOtpAsync(ResendEmailOtpRequest request, string requestIp, CancellationToken cancellationToken);
+
+        Task<OtpDispatchResult> RequestPasswordResetAsync(ForgotPasswordRequest request, string requestIp, CancellationToken cancellationToken);
+
+        Task<SimpleServiceResult> ResetPasswordAsync(ResetPasswordRequest request, CancellationToken cancellationToken);
     }
 
     public sealed class LoginServiceResult
@@ -46,6 +40,15 @@ namespace Web_Project.Services.Auth
         public string Message { get; init; } = string.Empty;
 
         public RegisterResponse? Response { get; init; }
+
+        public Dictionary<string, string[]> ValidationErrors { get; init; } = new();
+    }
+
+    public sealed class SimpleServiceResult
+    {
+        public bool Success { get; init; }
+
+        public string Message { get; init; } = string.Empty;
 
         public Dictionary<string, string[]> ValidationErrors { get; init; } = new();
     }

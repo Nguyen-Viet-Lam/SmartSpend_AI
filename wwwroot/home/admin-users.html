@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Users | SmartSpend AI</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/auth.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js" defer></script>
+  <script src="/js/app-shell.js" defer></script>
+  <script src="/js/finance-pages.js" defer></script>
+</head>
+<body data-layout="app" data-page="admin-users" data-page-title="Quản lý người dùng" data-required-role="SystemAdmin">
+  <div class="page-shell">
+    <aside class="app-sidebar" id="appSidebar"></aside>
+    <div class="app-frame">
+      <header class="app-topbar" id="appTopbar"></header>
+      <main class="app-content">
+        <section class="app-section">
+          <div id="adminUsersMessage" class="message" hidden></div>
+          <article class="table-card">
+            <div class="table-toolbar">
+              <div>
+                <h3>Danh sách tài khoản</h3>
+                <p class="muted">Admin có thể khóa/mở khóa user vi phạm hoặc theo yêu cầu.</p>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Họ tên</th>
+                  <th>Username</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Trạng thái</th>
+                  <th>Hành động</th>
+                </tr>
+              </thead>
+              <tbody id="adminUsersBody"></tbody>
+            </table>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+  <div class="app-backdrop" id="appBackdrop"></div>
+</body>
+</html>

@@ -8,7 +8,7 @@ using Web_Project.Models;
 
 #nullable disable
 
-namespace Web_Project.Migrations
+namespace Wed_Project.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
@@ -22,284 +22,227 @@ namespace Web_Project.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Web_Project.Models.AIProcess", b =>
+            modelBuilder.Entity("Web_Project.Models.AuditLog", b =>
                 {
-                    b.Property<int>("ProcessId")
+                    b.Property<int>("AuditLogId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProcessId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AuditLogId"));
 
-                    b.Property<int>("ContentId")
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<int?>("ActorUserId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("KeyPoints")
+                    b.Property<string>("Metadata")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("ProcessingTime")
-                        .HasColumnType("float");
-
-                    b.Property<string>("Summary")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ProcessId");
-
-                    b.HasIndex("ContentId")
-                        .IsUnique();
-
-                    b.ToTable("AIProcesses");
-                });
-
-            modelBuilder.Entity("Web_Project.Models.AISystemLog", b =>
-                {
-                    b.Property<int>("LogId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LogId"));
-
-                    b.Property<string>("ActionType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsError")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsGuest")
-                        .HasColumnType("bit");
-
-                    b.Property<double>("ProcessingTime")
-                        .HasColumnType("float");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("LogId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("AISystemLogs");
-                });
-
-            modelBuilder.Entity("Web_Project.Models.AdminAuditLog", b =>
-                {
-                    b.Property<int>("AuditId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AuditId"));
-
-                    b.Property<string>("ActionType")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<int>("AdminUserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DetailJson")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("IpAddress")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<string>("TargetId")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<string>("TargetType")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.HasKey("AuditId");
-
-                    b.HasIndex("AdminUserId");
-
-                    b.ToTable("AdminAuditLogs");
-                });
-
-            modelBuilder.Entity("Web_Project.Models.Content", b =>
-                {
-                    b.Property<int>("ContentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ContentId"));
-
-                    b.Property<string>("AI_DetectedGrade")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("AI_DetectedSubject")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ExtractedText")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FetchError")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
-                    b.Property<string>("FetchStatus")
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
-                    b.Property<string>("FileName")
+                    b.Property<string>("TargetId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
-                    b.Property<string>("FilePath")
+                    b.Property<string>("TargetType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
-                    b.Property<string>("FileType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("AuditLogId");
 
-                    b.Property<bool>("IsGuest")
-                        .HasColumnType("bit");
+                    b.HasIndex("ActorUserId");
 
-                    b.Property<string>("SourceType")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
-                    b.Property<string>("SourceUrl")
-                        .HasMaxLength(2048)
-                        .HasColumnType("nvarchar(2048)");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ContentId");
-
-                    b.HasIndex("SourceType");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Contents", t =>
-                        {
-                            t.HasCheckConstraint("CK_Contents_SourceType", "[SourceType] IN (N'FileUpload', N'TextUrl', N'VideoUrl', N'DocumentUrl')");
-
-                            t.HasCheckConstraint("CK_Contents_UrlFieldsBySource", "(([SourceType] = N'FileUpload' AND [SourceUrl] IS NULL AND [FetchStatus] IS NULL AND [FetchError] IS NULL) OR ([SourceType] <> N'FileUpload' AND [SourceUrl] IS NOT NULL AND [FetchStatus] IS NOT NULL))");
-                        });
+                    b.ToTable("AuditLogs", (string)null);
                 });
 
-            modelBuilder.Entity("Web_Project.Models.ContentModeration", b =>
+            modelBuilder.Entity("Web_Project.Models.Budget", b =>
                 {
-                    b.Property<int>("ModerationId")
+                    b.Property<int>("BudgetId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ModerationId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BudgetId"));
 
-                    b.Property<int>("ContentId")
+                    b.Property<int>("CategoryId")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("LimitAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("Month")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("BudgetId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("UserId", "CategoryId", "Month")
+                        .IsUnique();
+
+                    b.ToTable("Budgets", (string)null);
+                });
+
+            modelBuilder.Entity("Web_Project.Models.BudgetAlert", b =>
+                {
+                    b.Property<int>("BudgetAlertId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BudgetAlertId"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
 
-                    b.Property<DateTime?>("ReviewedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ReviewedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
+                    b.Property<string>("Level")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(280)
+                        .HasColumnType("nvarchar(280)");
 
-                    b.HasKey("ModerationId");
-
-                    b.HasIndex("ContentId")
-                        .IsUnique();
-
-                    b.HasIndex("ReviewedByUserId");
-
-                    b.HasIndex("Status");
-
-                    b.ToTable("ContentModerations");
-                });
-
-            modelBuilder.Entity("Web_Project.Models.DailyUsageCounter", b =>
-                {
-                    b.Property<int>("CounterId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("TransactionId")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CounterId"));
-
-                    b.Property<int>("AIProcessCount")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("GuestSessionId")
-                        .HasColumnType("int");
+                    b.HasKey("BudgetAlertId");
 
-                    b.Property<int>("QuizGenerationCount")
-                        .HasColumnType("int");
-
-                    b.Property<double>("TotalProcessingTime")
-                        .HasColumnType("float");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UploadCount")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UsageDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("CounterId");
-
-                    b.HasIndex("GuestSessionId");
+                    b.HasIndex("TransactionId");
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("UsageDate", "GuestSessionId")
-                        .IsUnique()
-                        .HasFilter("[GuestSessionId] IS NOT NULL");
+                    b.ToTable("BudgetAlerts", (string)null);
+                });
 
-                    b.HasIndex("UsageDate", "UserId")
-                        .IsUnique()
-                        .HasFilter("[UserId] IS NOT NULL");
+            modelBuilder.Entity("Web_Project.Models.Category", b =>
+                {
+                    b.Property<int>("CategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                    b.ToTable("DailyUsageCounters", t =>
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryId"));
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<string>("Icon")
+                        .IsRequired()
+                        .HasMaxLength(48)
+                        .HasColumnType("nvarchar(48)");
+
+                    b.Property<bool>("IsSystem")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.HasKey("CategoryId");
+
+                    b.HasIndex("Name", "Type")
+                        .IsUnique();
+
+                    b.ToTable("Categories", (string)null);
+
+                    b.HasData(
+                        new
                         {
-                            t.HasCheckConstraint("CK_DailyUsageCounters_Actor", "(([UserId] IS NOT NULL AND [GuestSessionId] IS NULL) OR ([UserId] IS NULL AND [GuestSessionId] IS NOT NULL))");
+                            CategoryId = 1,
+                            Color = "#ff7a18",
+                            Icon = "utensils",
+                            IsSystem = true,
+                            Name = "An uong",
+                            Type = "Expense"
+                        },
+                        new
+                        {
+                            CategoryId = 2,
+                            Color = "#00b894",
+                            Icon = "car",
+                            IsSystem = true,
+                            Name = "Di chuyen",
+                            Type = "Expense"
+                        },
+                        new
+                        {
+                            CategoryId = 3,
+                            Color = "#6c5ce7",
+                            Icon = "film",
+                            IsSystem = true,
+                            Name = "Giai tri",
+                            Type = "Expense"
+                        },
+                        new
+                        {
+                            CategoryId = 4,
+                            Color = "#ff4d4f",
+                            Icon = "receipt",
+                            IsSystem = true,
+                            Name = "Hoa don",
+                            Type = "Expense"
+                        },
+                        new
+                        {
+                            CategoryId = 5,
+                            Color = "#0097e6",
+                            Icon = "bag",
+                            IsSystem = true,
+                            Name = "Mua sam",
+                            Type = "Expense"
+                        },
+                        new
+                        {
+                            CategoryId = 6,
+                            Color = "#2ecc71",
+                            Icon = "wallet",
+                            IsSystem = true,
+                            Name = "Luong",
+                            Type = "Income"
+                        },
+                        new
+                        {
+                            CategoryId = 7,
+                            Color = "#00cec9",
+                            Icon = "sparkles",
+                            IsSystem = true,
+                            Name = "Thuong",
+                            Type = "Income"
+                        },
+                        new
+                        {
+                            CategoryId = 8,
+                            Color = "#95a5a6",
+                            Icon = "circle",
+                            IsSystem = true,
+                            Name = "Khac",
+                            Type = "Expense"
                         });
                 });
 
@@ -330,13 +273,13 @@ namespace Web_Project.Migrations
 
                     b.Property<string>("OtpHash")
                         .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("OtpSalt")
                         .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("Purpose")
                         .IsRequired()
@@ -345,8 +288,8 @@ namespace Web_Project.Migrations
 
                     b.Property<string>("RequestedIp")
                         .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<DateTime?>("UsedAt")
                         .HasColumnType("datetime2");
@@ -363,170 +306,141 @@ namespace Web_Project.Migrations
                     b.ToTable("EmailVerificationOtps");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.GuestSession", b =>
+            modelBuilder.Entity("Web_Project.Models.KeywordEntry", b =>
                 {
-                    b.Property<int>("GuestSessionId")
+                    b.Property<int>("KeywordEntryId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GuestSessionId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("KeywordEntryId"));
 
-                    b.Property<string>("FingerprintHash")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
 
-                    b.Property<DateTime>("FirstSeenAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("GuestToken")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<string>("IpAddress")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<bool>("IsBlocked")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime>("LastSeenAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("TrialUsedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserAgent")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
-
-                    b.HasKey("GuestSessionId");
-
-                    b.HasIndex("GuestToken")
-                        .IsUnique();
-
-                    b.ToTable("GuestSessions");
-                });
-
-            modelBuilder.Entity("Web_Project.Models.Question", b =>
-                {
-                    b.Property<int>("QuestionId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("Weight")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("QuestionId"));
-
-                    b.Property<string>("CorrectAnswer")
+                    b.Property<string>("Word")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Explanation")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("KeywordEntryId");
 
-                    b.Property<string>("OptionA")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasIndex("CategoryId");
 
-                    b.Property<string>("OptionB")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasIndex("Word");
 
-                    b.Property<string>("OptionC")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.ToTable("Keywords", (string)null);
 
-                    b.Property<string>("OptionD")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("QuestionText")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("QuizId")
-                        .HasColumnType("int");
-
-                    b.HasKey("QuestionId");
-
-                    b.HasIndex("QuizId");
-
-                    b.ToTable("Questions");
-                });
-
-            modelBuilder.Entity("Web_Project.Models.Quiz", b =>
-                {
-                    b.Property<int>("QuizId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("QuizId"));
-
-                    b.Property<int>("ContentId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Difficulty")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsGuest")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("QuizType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("TotalQuestions")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("QuizId");
-
-                    b.HasIndex("ContentId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Quizzes");
-                });
-
-            modelBuilder.Entity("Web_Project.Models.QuizAttempt", b =>
-                {
-                    b.Property<int>("AttemptId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AttemptId"));
-
-                    b.Property<int>("QuizId")
-                        .HasColumnType("int");
-
-                    b.Property<double>("Score")
-                        .HasColumnType("float");
-
-                    b.Property<DateTime>("StartedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("SubmittedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AttemptId");
-
-                    b.HasIndex("QuizId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("QuizAttempts");
+                    b.HasData(
+                        new
+                        {
+                            KeywordEntryId = 1,
+                            CategoryId = 1,
+                            IsActive = true,
+                            Weight = 10,
+                            Word = "tra sua"
+                        },
+                        new
+                        {
+                            KeywordEntryId = 2,
+                            CategoryId = 1,
+                            IsActive = true,
+                            Weight = 8,
+                            Word = "an vat"
+                        },
+                        new
+                        {
+                            KeywordEntryId = 3,
+                            CategoryId = 1,
+                            IsActive = true,
+                            Weight = 7,
+                            Word = "com"
+                        },
+                        new
+                        {
+                            KeywordEntryId = 4,
+                            CategoryId = 2,
+                            IsActive = true,
+                            Weight = 10,
+                            Word = "xang"
+                        },
+                        new
+                        {
+                            KeywordEntryId = 5,
+                            CategoryId = 2,
+                            IsActive = true,
+                            Weight = 9,
+                            Word = "grab"
+                        },
+                        new
+                        {
+                            KeywordEntryId = 6,
+                            CategoryId = 2,
+                            IsActive = true,
+                            Weight = 8,
+                            Word = "xe bus"
+                        },
+                        new
+                        {
+                            KeywordEntryId = 7,
+                            CategoryId = 3,
+                            IsActive = true,
+                            Weight = 10,
+                            Word = "xem phim"
+                        },
+                        new
+                        {
+                            KeywordEntryId = 8,
+                            CategoryId = 3,
+                            IsActive = true,
+                            Weight = 8,
+                            Word = "karaoke"
+                        },
+                        new
+                        {
+                            KeywordEntryId = 9,
+                            CategoryId = 4,
+                            IsActive = true,
+                            Weight = 8,
+                            Word = "dien"
+                        },
+                        new
+                        {
+                            KeywordEntryId = 10,
+                            CategoryId = 4,
+                            IsActive = true,
+                            Weight = 8,
+                            Word = "nuoc"
+                        },
+                        new
+                        {
+                            KeywordEntryId = 11,
+                            CategoryId = 4,
+                            IsActive = true,
+                            Weight = 7,
+                            Word = "wifi"
+                        },
+                        new
+                        {
+                            KeywordEntryId = 12,
+                            CategoryId = 6,
+                            IsActive = true,
+                            Weight = 10,
+                            Word = "luong"
+                        },
+                        new
+                        {
+                            KeywordEntryId = 13,
+                            CategoryId = 7,
+                            IsActive = true,
+                            Weight = 10,
+                            Word = "thuong"
+                        });
                 });
 
             modelBuilder.Entity("Web_Project.Models.Role", b =>
@@ -548,79 +462,112 @@ namespace Web_Project.Migrations
                         .IsUnique();
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            RoleId = 1,
+                            RoleName = "StandardUser"
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            RoleName = "SystemAdmin"
+                        });
                 });
 
-            modelBuilder.Entity("Web_Project.Models.StudyStatistic", b =>
+            modelBuilder.Entity("Web_Project.Models.TransactionEntry", b =>
                 {
-                    b.Property<int>("StatId")
+                    b.Property<int>("TransactionEntryId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StatId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TransactionEntryId"));
 
-                    b.Property<double>("AverageScore")
-                        .HasColumnType("float");
+                    b.Property<decimal>("AiConfidence")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
 
-                    b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("datetime2");
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("TotalAttempts")
+                    b.Property<int>("CategoryId")
                         .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("WeakTopic")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("StatId");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("StudyStatistics");
-                });
-
-            modelBuilder.Entity("Web_Project.Models.SystemSetting", b =>
-                {
-                    b.Property<int>("SettingId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SettingId"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Note")
                         .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
 
-                    b.Property<string>("SettingKey")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                    b.Property<string>("ReceiptImagePath")
+                        .HasMaxLength(260)
+                        .HasColumnType("nvarchar(260)");
 
-                    b.Property<string>("SettingValue")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime>("TransactionDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UpdatedByUserId")
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.HasKey("SettingId");
+                    b.Property<int>("WalletId")
+                        .HasColumnType("int");
 
-                    b.HasIndex("SettingKey")
-                        .IsUnique();
+                    b.HasKey("TransactionEntryId");
 
-                    b.HasIndex("UpdatedByUserId");
+                    b.HasIndex("CategoryId");
 
-                    b.ToTable("SystemSettings");
+                    b.HasIndex("UserId", "TransactionDate");
+
+                    b.HasIndex("WalletId", "TransactionDate");
+
+                    b.ToTable("Transactions", (string)null);
+                });
+
+            modelBuilder.Entity("Web_Project.Models.TransferRecord", b =>
+                {
+                    b.Property<int>("TransferRecordId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TransferRecordId"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("FromWalletId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasMaxLength(280)
+                        .HasColumnType("nvarchar(280)");
+
+                    b.Property<int>("ToWalletId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("TransferDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("TransferRecordId");
+
+                    b.HasIndex("FromWalletId");
+
+                    b.HasIndex("ToWalletId");
+
+                    b.ToTable("Transfers", (string)null);
                 });
 
             modelBuilder.Entity("Web_Project.Models.User", b =>
@@ -676,109 +623,89 @@ namespace Web_Project.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.UserAnswer", b =>
+            modelBuilder.Entity("Web_Project.Models.Wallet", b =>
                 {
-                    b.Property<int>("AnswerId")
+                    b.Property<int>("WalletId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AnswerId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WalletId"));
 
-                    b.Property<int>("AttemptId")
-                        .HasColumnType("int");
+                    b.Property<decimal>("Balance")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<bool>("IsCorrect")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDefault")
                         .HasColumnType("bit");
 
-                    b.Property<int>("QuestionId")
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<string>("SelectedAnswer")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("WalletId");
 
-                    b.HasKey("AnswerId");
+                    b.HasIndex("UserId", "Name")
+                        .IsUnique();
 
-                    b.HasIndex("AttemptId");
-
-                    b.HasIndex("QuestionId");
-
-                    b.ToTable("UserAnswers");
+                    b.ToTable("Wallets", (string)null);
                 });
 
-            modelBuilder.Entity("Web_Project.Models.AIProcess", b =>
+            modelBuilder.Entity("Web_Project.Models.AuditLog", b =>
                 {
-                    b.HasOne("Web_Project.Models.Content", "Content")
-                        .WithOne("AIProcess")
-                        .HasForeignKey("Web_Project.Models.AIProcess", "ContentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Content");
-                });
-
-            modelBuilder.Entity("Web_Project.Models.AISystemLog", b =>
-                {
-                    b.HasOne("Web_Project.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                    b.HasOne("Web_Project.Models.User", "ActorUser")
+                        .WithMany("AuditLogs")
+                        .HasForeignKey("ActorUserId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("User");
+                    b.Navigation("ActorUser");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.AdminAuditLog", b =>
+            modelBuilder.Entity("Web_Project.Models.Budget", b =>
                 {
-                    b.HasOne("Web_Project.Models.User", "AdminUser")
-                        .WithMany("AdminAuditLogs")
-                        .HasForeignKey("AdminUserId")
+                    b.HasOne("Web_Project.Models.Category", "Category")
+                        .WithMany("Budgets")
+                        .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("AdminUser");
-                });
-
-            modelBuilder.Entity("Web_Project.Models.Content", b =>
-                {
                     b.HasOne("Web_Project.Models.User", "User")
-                        .WithMany("Contents")
+                        .WithMany("Budgets")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.ContentModeration", b =>
+            modelBuilder.Entity("Web_Project.Models.BudgetAlert", b =>
                 {
-                    b.HasOne("Web_Project.Models.Content", "Content")
-                        .WithOne("ContentModeration")
-                        .HasForeignKey("Web_Project.Models.ContentModeration", "ContentId")
+                    b.HasOne("Web_Project.Models.TransactionEntry", "Transaction")
+                        .WithMany()
+                        .HasForeignKey("TransactionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Web_Project.Models.User", "ReviewedBy")
-                        .WithMany("ReviewedContentModerations")
-                        .HasForeignKey("ReviewedByUserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Content");
-
-                    b.Navigation("ReviewedBy");
-                });
-
-            modelBuilder.Entity("Web_Project.Models.DailyUsageCounter", b =>
-                {
-                    b.HasOne("Web_Project.Models.GuestSession", "GuestSession")
-                        .WithMany("DailyUsageCounters")
-                        .HasForeignKey("GuestSessionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.HasOne("Web_Project.Models.User", "User")
-                        .WithMany("DailyUsageCounters")
+                        .WithMany("BudgetAlerts")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("GuestSession");
+                    b.Navigation("Transaction");
 
                     b.Navigation("User");
                 });
@@ -793,72 +720,61 @@ namespace Web_Project.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.Question", b =>
+            modelBuilder.Entity("Web_Project.Models.KeywordEntry", b =>
                 {
-                    b.HasOne("Web_Project.Models.Quiz", "Quiz")
-                        .WithMany("Questions")
-                        .HasForeignKey("QuizId")
+                    b.HasOne("Web_Project.Models.Category", "Category")
+                        .WithMany("Keywords")
+                        .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Quiz");
+                    b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.Quiz", b =>
+            modelBuilder.Entity("Web_Project.Models.TransactionEntry", b =>
                 {
-                    b.HasOne("Web_Project.Models.Content", "Content")
-                        .WithMany("Quizzes")
-                        .HasForeignKey("ContentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("Web_Project.Models.Category", "Category")
+                        .WithMany("Transactions")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Web_Project.Models.User", "User")
-                        .WithMany("Quizzes")
+                        .WithMany("Transactions")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Content");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Web_Project.Models.QuizAttempt", b =>
-                {
-                    b.HasOne("Web_Project.Models.Quiz", "Quiz")
-                        .WithMany("QuizAttempts")
-                        .HasForeignKey("QuizId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Web_Project.Models.User", "User")
-                        .WithMany("QuizAttempts")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Quiz");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Web_Project.Models.StudyStatistic", b =>
-                {
-                    b.HasOne("Web_Project.Models.User", "User")
-                        .WithOne("StudyStatistic")
-                        .HasForeignKey("Web_Project.Models.StudyStatistic", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("Web_Project.Models.Wallet", "Wallet")
+                        .WithMany("Transactions")
+                        .HasForeignKey("WalletId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.Navigation("Category");
+
                     b.Navigation("User");
+
+                    b.Navigation("Wallet");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.SystemSetting", b =>
+            modelBuilder.Entity("Web_Project.Models.TransferRecord", b =>
                 {
-                    b.HasOne("Web_Project.Models.User", "UpdatedBy")
-                        .WithMany("UpdatedSystemSettings")
-                        .HasForeignKey("UpdatedByUserId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                    b.HasOne("Web_Project.Models.Wallet", "FromWallet")
+                        .WithMany("OutgoingTransfers")
+                        .HasForeignKey("FromWalletId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
-                    b.Navigation("UpdatedBy");
+                    b.HasOne("Web_Project.Models.Wallet", "ToWallet")
+                        .WithMany("IncomingTransfers")
+                        .HasForeignKey("ToWalletId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("FromWallet");
+
+                    b.Navigation("ToWallet");
                 });
 
             modelBuilder.Entity("Web_Project.Models.User", b =>
@@ -866,60 +782,30 @@ namespace Web_Project.Migrations
                     b.HasOne("Web_Project.Models.Role", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.UserAnswer", b =>
+            modelBuilder.Entity("Web_Project.Models.Wallet", b =>
                 {
-                    b.HasOne("Web_Project.Models.QuizAttempt", "QuizAttempt")
-                        .WithMany("UserAnswers")
-                        .HasForeignKey("AttemptId")
+                    b.HasOne("Web_Project.Models.User", "User")
+                        .WithMany("Wallets")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Web_Project.Models.Question", "Question")
-                        .WithMany("UserAnswers")
-                        .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Question");
-
-                    b.Navigation("QuizAttempt");
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.Content", b =>
+            modelBuilder.Entity("Web_Project.Models.Category", b =>
                 {
-                    b.Navigation("AIProcess");
+                    b.Navigation("Budgets");
 
-                    b.Navigation("ContentModeration");
+                    b.Navigation("Keywords");
 
-                    b.Navigation("Quizzes");
-                });
-
-            modelBuilder.Entity("Web_Project.Models.GuestSession", b =>
-                {
-                    b.Navigation("DailyUsageCounters");
-                });
-
-            modelBuilder.Entity("Web_Project.Models.Question", b =>
-                {
-                    b.Navigation("UserAnswers");
-                });
-
-            modelBuilder.Entity("Web_Project.Models.Quiz", b =>
-                {
-                    b.Navigation("Questions");
-
-                    b.Navigation("QuizAttempts");
-                });
-
-            modelBuilder.Entity("Web_Project.Models.QuizAttempt", b =>
-                {
-                    b.Navigation("UserAnswers");
+                    b.Navigation("Transactions");
                 });
 
             modelBuilder.Entity("Web_Project.Models.Role", b =>
@@ -929,21 +815,24 @@ namespace Web_Project.Migrations
 
             modelBuilder.Entity("Web_Project.Models.User", b =>
                 {
-                    b.Navigation("AdminAuditLogs");
+                    b.Navigation("AuditLogs");
 
-                    b.Navigation("Contents");
+                    b.Navigation("BudgetAlerts");
 
-                    b.Navigation("DailyUsageCounters");
+                    b.Navigation("Budgets");
 
-                    b.Navigation("QuizAttempts");
+                    b.Navigation("Transactions");
 
-                    b.Navigation("Quizzes");
+                    b.Navigation("Wallets");
+                });
 
-                    b.Navigation("ReviewedContentModerations");
+            modelBuilder.Entity("Web_Project.Models.Wallet", b =>
+                {
+                    b.Navigation("IncomingTransfers");
 
-                    b.Navigation("StudyStatistic");
+                    b.Navigation("OutgoingTransfers");
 
-                    b.Navigation("UpdatedSystemSettings");
+                    b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
         }

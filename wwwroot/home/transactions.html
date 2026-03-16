@@ -1,0 +1,140 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giao dịch | SmartSpend AI</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/auth.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js" defer></script>
+  <script src="/js/app-shell.js" defer></script>
+  <script src="/js/finance-pages.js" defer></script>
+</head>
+<body data-layout="app" data-page="transactions" data-page-title="Nhập và quản lý giao dịch">
+  <div class="page-shell">
+    <aside class="app-sidebar" id="appSidebar"></aside>
+    <div class="app-frame">
+      <header class="app-topbar" id="appTopbar"></header>
+      <main class="app-content">
+        <section class="app-section">
+          <div class="dashboard-grid">
+            <article class="panel" id="quick-add">
+              <div class="panel-header">
+                <div>
+                  <h2>Form giao dịch nhanh</h2>
+                  <p class="muted">Đây là phần khung nhập giao dịch cốt lõi. AI Smart Input và các gợi ý nâng cao sẽ được nhóm bổ sung ở giai đoạn sau.</p>
+                </div>
+              </div>
+              <form id="transactionForm" class="form-stack">
+                <div id="transactionMessage" class="message" hidden></div>
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="walletId">Ví</label>
+                    <select class="select" id="walletId" name="walletId"></select>
+                  </div>
+                  <div class="field">
+                    <label for="categoryId">Danh mục</label>
+                    <select class="select" id="categoryId" name="categoryId"></select>
+                  </div>
+                </div>
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="transactionType">Loại</label>
+                    <select class="select" id="transactionType" name="type">
+                      <option value="Expense">Chi</option>
+                      <option value="Income">Thu</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="transactionAmount">Số tiền</label>
+                    <input class="input" id="transactionAmount" name="amount" type="number" min="1" step="1000" required>
+                  </div>
+                </div>
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="transactionDate">Ngày giao dịch</label>
+                    <input class="input" id="transactionDate" name="transactionDate" type="date" required>
+                  </div>
+                  <div class="field">
+                    <label for="receiptImagePath">Biên lai (path local - tùy chọn)</label>
+                    <input class="input" id="receiptImagePath" name="receiptImagePath">
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="transactionNote">Ghi chú</label>
+                  <textarea class="textarea" id="transactionNote" name="note"></textarea>
+                </div>
+                <div class="inline-actions">
+                  <button class="btn btn-primary" type="submit">Lưu giao dịch</button>
+                  <button class="btn btn-secondary" type="button" id="cancelTransactionEdit" hidden>Hủy chỉnh sửa</button>
+                </div>
+              </form>
+            </article>
+          </div>
+
+          <article class="table-card">
+            <div class="table-toolbar">
+              <div>
+                <h3>Lịch sử giao dịch</h3>
+                <p class="muted">Tổng số bản ghi hiện tại: <strong id="transactionCount">0</strong></p>
+              </div>
+            </div>
+            <form id="transactionFilterForm" class="filters">
+              <div class="form-grid">
+                <div class="field">
+                  <label for="filterFrom">Từ ngày</label>
+                  <input class="input" id="filterFrom" name="from" type="date">
+                </div>
+                <div class="field">
+                  <label for="filterTo">Đến ngày</label>
+                  <input class="input" id="filterTo" name="to" type="date">
+                </div>
+              </div>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="filterWalletId">Ví</label>
+                  <select class="select" id="filterWalletId" name="walletId"></select>
+                </div>
+                <div class="field">
+                  <label for="filterCategoryId">Danh mục</label>
+                  <select class="select" id="filterCategoryId" name="categoryId"></select>
+                </div>
+              </div>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="filterType">Loại</label>
+                  <select class="select" id="filterType" name="type">
+                    <option value="">Tất cả</option>
+                    <option value="Expense">Chi</option>
+                    <option value="Income">Thu</option>
+                  </select>
+                </div>
+                <div class="inline-actions" style="align-items:end;">
+                  <button class="btn btn-primary" type="submit">Lọc dữ liệu</button>
+                  <button class="btn btn-secondary" type="button" id="resetFilters">Reset</button>
+                </div>
+              </div>
+            </form>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Ngày</th>
+                  <th>Nội dung</th>
+                  <th>Ví</th>
+                  <th>Danh mục</th>
+                  <th>Loại</th>
+                  <th>Số tiền</th>
+                  <th>Hành động</th>
+                </tr>
+              </thead>
+              <tbody id="transactionTableBody"></tbody>
+            </table>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+  <div class="app-backdrop" id="appBackdrop"></div>
+  <a class="btn btn-primary fab" href="#quick-add">+ Thêm giao dịch</a>
+</body>
+</html>

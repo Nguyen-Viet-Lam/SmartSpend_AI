@@ -1,0 +1,37 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | SmartSpend AI</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/auth.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js" defer></script>
+  <script src="/js/app-shell.js" defer></script>
+  <script src="/js/finance-pages.js" defer></script>
+</head>
+<body data-layout="app" data-page="admin-dashboard" data-page-title="Admin Dashboard" data-required-role="SystemAdmin">
+  <div class="page-shell">
+    <aside class="app-sidebar" id="appSidebar"></aside>
+    <div class="app-frame">
+      <header class="app-topbar" id="appTopbar"></header>
+      <main class="app-content">
+        <section class="app-section">
+          <div id="adminDashboardMessage" class="message" hidden></div>
+          <div class="metrics-grid">
+            <article class="metric-card"><div class="metric-label">User mới hôm nay</div><div class="metric-value" id="adminNewUsersToday">0</div></article>
+            <article class="metric-card"><div class="metric-label">Transactions hôm nay</div><div class="metric-value" id="adminTransactionsToday">0</div></article>
+            <article class="metric-card"><div class="metric-label">Tổng người dùng</div><div class="metric-value" id="adminTotalUsers">0</div></article>
+            <article class="metric-card"><div class="metric-label">Keyword AI (mở rộng)</div><div class="metric-value" id="adminTotalKeywords">0</div></article>
+          </div>
+          <div class="panel">
+            <h2>Vai trò của trang này</h2>
+            <p class="muted">Admin Dashboard là khung quản trị cơ bản để trình bày phân quyền và thống kê hệ thống. Trong phiên bản khung hiện tại, nhóm ưu tiên phần tổng quan và quản lý user trước; các module nâng cao sẽ được bổ sung sau.</p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <div class="app-backdrop" id="appBackdrop"></div>
+</body>
+</html>

@@ -1,0 +1,75 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ngân sách | SmartSpend AI</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/auth.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js" defer></script>
+  <script src="/js/app-shell.js" defer></script>
+  <script src="/js/finance-pages.js" defer></script>
+</head>
+<body data-layout="app" data-page="budgets" data-page-title="Theo dõi ngân sách theo tháng">
+  <div class="page-shell">
+    <aside class="app-sidebar" id="appSidebar"></aside>
+    <div class="app-frame">
+      <header class="app-topbar" id="appTopbar"></header>
+      <main class="app-content">
+        <section class="app-section">
+          <div class="dashboard-grid">
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <h2>Thiết lập budget</h2>
+                  <p class="muted">Mỗi budget gắn với một category chi và một tháng cụ thể.</p>
+                </div>
+              </div>
+              <form id="budgetForm" class="form-stack">
+                <div id="budgetMessage" class="message" hidden></div>
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="budgetCategoryId">Danh mục chi</label>
+                    <select class="select" id="budgetCategoryId" name="categoryId"></select>
+                  </div>
+                  <div class="field">
+                    <label for="budgetMonth">Tháng</label>
+                    <input class="input" id="budgetMonth" name="month" type="month">
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="budgetLimitAmount">Hạn mức</label>
+                  <input class="input" id="budgetLimitAmount" name="limitAmount" type="number" min="1" step="1000" required>
+                </div>
+                <button class="btn btn-primary" type="submit">Lưu ngân sách</button>
+              </form>
+            </article>
+            <article class="panel">
+              <h2>Ý nghĩa màu cảnh báo</h2>
+              <ul class="feature-list">
+                <li><span class="tag tag-safe">Safe</span> dưới 80% budget.</li>
+                <li><span class="tag tag-warning">Warning</span> từ 80% đến dưới 100% budget.</li>
+                <li><span class="tag tag-danger">Danger</span> đã vượt 100% budget.</li>
+              </ul>
+              <p class="muted">Khi phát sinh Warning hoặc Danger, hệ thống sẽ ghi BudgetAlert và đẩy thông báo qua SignalR.</p>
+            </article>
+          </div>
+
+          <article class="table-card">
+            <div class="table-toolbar">
+              <div>
+                <h3>Danh sách ngân sách</h3>
+                <p class="muted">Số mục hiện có: <strong id="budgetCount">0</strong></p>
+              </div>
+              <button class="btn btn-secondary" type="button" id="reloadBudgets">Làm mới</button>
+            </div>
+            <div id="budgetList"></div>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+  <div class="app-backdrop" id="appBackdrop"></div>
+  <a class="btn btn-primary fab" href="/home/transactions.html#quick-add">+ Thêm giao dịch</a>
+</body>
+</html>

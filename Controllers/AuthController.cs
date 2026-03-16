@@ -12,16 +12,13 @@ namespace Web_Project.Controllers
     {
         private readonly IAuthService _authService;
 
-        public AuthController(
-            IAuthService authService)
+        public AuthController(IAuthService authService)
         {
             _authService = authService;
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<LoginResponse>> Login(
-            [FromBody] LoginRequest request,
-            CancellationToken cancellationToken)
+        public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -47,24 +44,17 @@ namespace Web_Project.Controllers
         [HttpGet("me")]
         public IActionResult Me()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var username = User.FindFirstValue(ClaimTypes.Name);
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            var role = User.FindFirstValue(ClaimTypes.Role);
-
             return Ok(new
             {
-                userId,
-                username,
-                email,
-                role
+                userId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                username = User.FindFirstValue(ClaimTypes.Name),
+                email = User.FindFirstValue(ClaimTypes.Email),
+                role = User.FindFirstValue(ClaimTypes.Role)
             });
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<RegisterResponse>> Register(
-            [FromBody] RegisterRequest request,
-            CancellationToken cancellationToken)
+        public async Task<ActionResult<RegisterResponse>> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -95,9 +85,7 @@ namespace Web_Project.Controllers
         }
 
         [HttpPost("verify-email-otp")]
-        public async Task<IActionResult> VerifyEmailOtp(
-            [FromBody] VerifyEmailOtpRequest request,
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> VerifyEmailOtp([FromBody] VerifyEmailOtpRequest request, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -105,7 +93,6 @@ namespace Web_Project.Controllers
             }
 
             var result = await _authService.VerifyEmailOtpAsync(request, cancellationToken);
-
             if (!result.Success)
             {
                 return BadRequest(new { message = result.Message });
@@ -115,9 +102,7 @@ namespace Web_Project.Controllers
         }
 
         [HttpPost("resend-email-otp")]
-        public async Task<IActionResult> ResendEmailOtp(
-            [FromBody] ResendEmailOtpRequest request,
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> ResendEmailOtp([FromBody] ResendEmailOtpRequest request, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -126,17 +111,53 @@ namespace Web_Project.Controllers
 
             var requestIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
             var result = await _authService.ResendEmailOtpAsync(request, requestIp, cancellationToken);
-
             if (!result.Success)
             {
                 return BadRequest(new { message = result.Message });
             }
 
-            return Ok(new
+            return Ok(new { message = result.Message, expiresAt = result.ExpiresAt });
+        }
+
+        [HttpPost("request-password-reset")]
+        public async Task<IActionResult> RequestPasswordReset([FromBody] ForgotPasswordRequest request, CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
             {
-                message = result.Message,
-                expiresAt = result.ExpiresAt
-            });
+                return ValidationProblem(ModelState);
+            }
+
+            var requestIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? string.Empty;
+            var result = await _authService.RequestPasswordResetAsync(request, requestIp, cancellationToken);
+            if (!result.Success)
+            {
+                return BadRequest(new { message = result.Message });
+            }
+
+            return Ok(new { message = result.Message, expiresAt = result.ExpiresAt });
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request, CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            var result = await _authService.ResetPasswordAsync(request, cancellationToken);
+            if (!result.Success)
+            {
+                if (result.ValidationErrors.Count > 0)
+                {
+                    AddValidationErrors(result.ValidationErrors);
+                    return ValidationProblem(ModelState);
+                }
+
+                return BadRequest(new { message = result.Message });
+            }
+
+            return Ok(new { message = result.Message });
         }
 
         private void AddValidationErrors(Dictionary<string, string[]> errors)

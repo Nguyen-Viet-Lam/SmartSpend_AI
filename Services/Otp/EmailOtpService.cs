@@ -3,14 +3,13 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Web_Project.Models;
+using Web_Project.Security;
 using Web_Project.Services.Email;
 
 namespace Web_Project.Services.Otp
 {
     public class EmailOtpService : IEmailOtpService
     {
-        private const string RegisterPurpose = "Register";
-
         private readonly AppDbContext _dbContext;
         private readonly IEmailSender _emailSender;
         private readonly EmailOtpSettings _otpSettings;
@@ -28,17 +27,59 @@ namespace Web_Project.Services.Otp
             _logger = logger;
         }
 
-        public async Task<OtpDispatchResult> IssueRegisterOtpAsync(
-            User user,
-            string requestIp,
-            CancellationToken cancellationToken)
+        public Task<OtpDispatchResult> IssueRegisterOtpAsync(User user, string requestIp, CancellationToken cancellationToken)
+        {
+            return IssueOtpAsync(user, requestIp, OtpPurposes.Register, cancellationToken);
+        }
+
+        public Task<OtpVerificationResult> VerifyRegisterOtpAsync(string email, string otpCode, CancellationToken cancellationToken)
+        {
+            return VerifyOtpAsync(email, otpCode, OtpPurposes.Register, updateEmailVerification: true, cancellationToken);
+        }
+
+        public async Task<OtpDispatchResult> ResendRegisterOtpAsync(string email, string requestIp, CancellationToken cancellationToken)
+        {
+            var normalizedEmail = NormalizeEmail(email);
+            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Email == normalizedEmail, cancellationToken);
+            if (user is null)
+            {
+                return new OtpDispatchResult
+                {
+                    Success = false,
+                    Message = "Email chua dang ky tai khoan."
+                };
+            }
+
+            if (user.IsEmailVerified)
+            {
+                return new OtpDispatchResult
+                {
+                    Success = false,
+                    Message = "Email da duoc xac thuc."
+                };
+            }
+
+            return await IssueRegisterOtpAsync(user, requestIp, cancellationToken);
+        }
+
+        public Task<OtpDispatchResult> IssuePasswordResetOtpAsync(User user, string requestIp, CancellationToken cancellationToken)
+        {
+            return IssueOtpAsync(user, requestIp, OtpPurposes.ResetPassword, cancellationToken);
+        }
+
+        public Task<OtpVerificationResult> VerifyPasswordResetOtpAsync(string email, string otpCode, CancellationToken cancellationToken)
+        {
+            return VerifyOtpAsync(email, otpCode, OtpPurposes.ResetPassword, updateEmailVerification: false, cancellationToken);
+        }
+
+        private async Task<OtpDispatchResult> IssueOtpAsync(User user, string requestIp, string purpose, CancellationToken cancellationToken)
         {
             var email = NormalizeEmail(user.Email);
             var now = DateTime.UtcNow;
-            var expireAt = now.AddMinutes(Math.Max(_otpSettings.ExpireMinutes, 1));
+            var expiresAt = now.AddMinutes(Math.Max(_otpSettings.ExpireMinutes, 1));
 
             var activeOtps = await _dbContext.EmailVerificationOtps
-                .Where(x => x.Email == email && x.Purpose == RegisterPurpose && !x.IsUsed)
+                .Where(x => x.Email == email && x.Purpose == purpose && !x.IsUsed)
                 .ToListAsync(cancellationToken);
 
             foreach (var activeOtp in activeOtps)
@@ -51,49 +92,50 @@ namespace Web_Project.Services.Otp
             var salt = GenerateSalt();
             var hash = HashOtp(otpCode, salt);
 
-            var otpEntity = new EmailVerificationOtp
+            _dbContext.EmailVerificationOtps.Add(new EmailVerificationOtp
             {
                 Email = email,
-                Purpose = RegisterPurpose,
+                Purpose = purpose,
                 UserId = user.UserId,
                 OtpHash = hash,
                 OtpSalt = salt,
                 AttemptCount = 0,
                 IsUsed = false,
                 CreatedAt = now,
-                ExpiresAt = expireAt,
+                ExpiresAt = expiresAt,
                 RequestedIp = requestIp
-            };
+            });
 
-            _dbContext.EmailVerificationOtps.Add(otpEntity);
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             try
             {
-                await SendRegisterOtpMailAsync(email, otpCode, expireAt, cancellationToken);
+                await SendOtpMailAsync(email, otpCode, expiresAt, purpose, cancellationToken);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to send register OTP email to {Email}", email);
+                _logger.LogError(ex, "Failed to send OTP email for {Purpose} to {Email}", purpose, email);
                 return new OtpDispatchResult
                 {
                     Success = false,
-                    ExpiresAt = expireAt,
-                    Message = "Tạo OTP thành công nhưng gửi email thất bại."
+                    Message = "Tao OTP thanh cong nhung gui email that bai.",
+                    ExpiresAt = expiresAt
                 };
             }
 
             return new OtpDispatchResult
             {
                 Success = true,
-                ExpiresAt = expireAt,
-                Message = "Đã gửi mã OTP tới email."
+                Message = "Da gui ma OTP toi email.",
+                ExpiresAt = expiresAt
             };
         }
 
-        public async Task<OtpVerificationResult> VerifyRegisterOtpAsync(
+        private async Task<OtpVerificationResult> VerifyOtpAsync(
             string email,
             string otpCode,
+            string purpose,
+            bool updateEmailVerification,
             CancellationToken cancellationToken)
         {
             var normalizedEmail = NormalizeEmail(email);
@@ -101,7 +143,7 @@ namespace Web_Project.Services.Otp
             var maxAttempts = Math.Max(_otpSettings.MaxAttempts, 1);
 
             var otpEntity = await _dbContext.EmailVerificationOtps
-                .Where(x => x.Email == normalizedEmail && x.Purpose == RegisterPurpose && !x.IsUsed)
+                .Where(x => x.Email == normalizedEmail && x.Purpose == purpose && !x.IsUsed)
                 .OrderByDescending(x => x.CreatedAt)
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -110,7 +152,7 @@ namespace Web_Project.Services.Otp
                 return new OtpVerificationResult
                 {
                     Success = false,
-                    Message = "Không tìm thấy OTP hợp lệ."
+                    Message = "Khong tim thay OTP hop le."
                 };
             }
 
@@ -119,11 +161,10 @@ namespace Web_Project.Services.Otp
                 otpEntity.IsUsed = true;
                 otpEntity.UsedAt = now;
                 await _dbContext.SaveChangesAsync(cancellationToken);
-
                 return new OtpVerificationResult
                 {
                     Success = false,
-                    Message = "OTP đã hết hạn."
+                    Message = "OTP da het han."
                 };
             }
 
@@ -132,101 +173,68 @@ namespace Web_Project.Services.Otp
                 otpEntity.IsUsed = true;
                 otpEntity.UsedAt = now;
                 await _dbContext.SaveChangesAsync(cancellationToken);
-
                 return new OtpVerificationResult
                 {
                     Success = false,
-                    Message = "OTP đã vượt quá số lần thử cho phép."
+                    Message = "OTP da vuot qua so lan thu cho phep."
                 };
             }
 
-            var isMatch = VerifyOtp(otpCode, otpEntity.OtpSalt, otpEntity.OtpHash);
-            if (!isMatch)
+            if (!VerifyOtp(otpCode, otpEntity.OtpSalt, otpEntity.OtpHash))
             {
                 otpEntity.AttemptCount += 1;
                 await _dbContext.SaveChangesAsync(cancellationToken);
-
                 return new OtpVerificationResult
                 {
                     Success = false,
-                    Message = "OTP không chính xác."
+                    Message = "OTP khong chinh xac."
                 };
             }
 
             otpEntity.IsUsed = true;
             otpEntity.UsedAt = now;
 
-            var user = await _dbContext.Users
-                .FirstOrDefaultAsync(x => x.Email == normalizedEmail, cancellationToken);
-
-            if (user is null)
+            if (updateEmailVerification)
             {
-                await _dbContext.SaveChangesAsync(cancellationToken);
-                return new OtpVerificationResult
+                var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Email == normalizedEmail, cancellationToken);
+                if (user is not null)
                 {
-                    Success = false,
-                    Message = "Không tìm thấy tài khoản cần xác thực."
-                };
+                    user.IsEmailVerified = true;
+                }
             }
 
-            user.IsEmailVerified = true;
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             return new OtpVerificationResult
             {
                 Success = true,
-                Message = "Xác thực email thành công."
+                Message = purpose == OtpPurposes.Register
+                    ? "Xac thuc email thanh cong."
+                    : "OTP dat lai mat khau hop le."
             };
         }
 
-        public async Task<OtpDispatchResult> ResendRegisterOtpAsync(
-            string email,
-            string requestIp,
-            CancellationToken cancellationToken)
-        {
-            var normalizedEmail = NormalizeEmail(email);
-            var user = await _dbContext.Users
-                .FirstOrDefaultAsync(x => x.Email == normalizedEmail, cancellationToken);
-
-            if (user is null)
-            {
-                return new OtpDispatchResult
-                {
-                    Success = false,
-                    Message = "Email chưa đăng ký tài khoản."
-                };
-            }
-
-            if (user.IsEmailVerified)
-            {
-                return new OtpDispatchResult
-                {
-                    Success = false,
-                    Message = "Email đã được xác thực."
-                };
-            }
-
-            return await IssueRegisterOtpAsync(user, requestIp, cancellationToken);
-        }
-
-        private async Task SendRegisterOtpMailAsync(
+        private async Task SendOtpMailAsync(
             string email,
             string otpCode,
-            DateTime expireAt,
+            DateTime expiresAt,
+            string purpose,
             CancellationToken cancellationToken)
         {
-            var subject = "Ma OTP xac thuc tai khoan";
-            var textBody =
-                $"Ma OTP cua ban la: {otpCode}. Ma co hieu luc den {expireAt:yyyy-MM-dd HH:mm:ss} UTC.";
-            var htmlBody =
-                $"<p>Ma OTP xac thuc tai khoan cua ban la:</p><h2>{otpCode}</h2><p>Ma co hieu luc den <strong>{expireAt:yyyy-MM-dd HH:mm:ss} UTC</strong>.</p>";
+            var subject = purpose == OtpPurposes.Register
+                ? "SmartSpend - Ma OTP xac thuc tai khoan"
+                : "SmartSpend - Ma OTP dat lai mat khau";
 
-            await _emailSender.SendAsync(
-                email,
-                subject,
-                htmlBody,
-                textBody,
-                cancellationToken);
+            var title = purpose == OtpPurposes.Register ? "xac thuc tai khoan" : "dat lai mat khau";
+            var textBody = $"Ma OTP de {title} cua ban la: {otpCode}. Ma co hieu luc den {expiresAt:yyyy-MM-dd HH:mm:ss} UTC.";
+            var htmlBody = $"<p>Ma OTP de {title} cua ban la:</p><h2>{otpCode}</h2><p>Ma co hieu luc den <strong>{expiresAt:yyyy-MM-dd HH:mm:ss} UTC</strong>.</p>";
+
+            await _emailSender.SendAsync(email, subject, htmlBody, textBody, cancellationToken);
+        }
+
+        private static string NormalizeEmail(string email)
+        {
+            return email.Trim().ToLowerInvariant();
         }
 
         private static string GenerateOtpCode()
@@ -242,23 +250,14 @@ namespace Web_Project.Services.Otp
         private static string HashOtp(string otpCode, string salt)
         {
             var input = Encoding.UTF8.GetBytes($"{otpCode}:{salt}");
-            var hash = SHA256.HashData(input);
-            return Convert.ToBase64String(hash);
+            return Convert.ToBase64String(SHA256.HashData(input));
         }
 
         private static bool VerifyOtp(string otpCode, string salt, string storedHash)
         {
-            var computedHash = HashOtp(otpCode, salt);
-
-            var left = Convert.FromBase64String(computedHash);
-            var right = Convert.FromBase64String(storedHash);
-
-            return CryptographicOperations.FixedTimeEquals(left, right);
-        }
-
-        private static string NormalizeEmail(string email)
-        {
-            return email.Trim().ToLowerInvariant();
+            var computedHash = Convert.FromBase64String(HashOtp(otpCode, salt));
+            var storedBytes = Convert.FromBase64String(storedHash);
+            return CryptographicOperations.FixedTimeEquals(computedHash, storedBytes);
         }
     }
 }

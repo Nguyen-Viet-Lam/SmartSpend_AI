@@ -3,7 +3,7 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       ACCEPT_EULA: "Y"
-      SA_PASSWORD: "Thpasssql123"
+      SA_PASSWORD: "SmartSpend123!"
     ports:
       - "1433:1433"
     volumes:
@@ -24,7 +24,7 @@ services:
         condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=myDB;User Id=sa;Password=Thpasssql123;TrustServerCertificate=True;"
+      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=SmartSpendDb;User Id=sa;Password=SmartSpend123!;TrustServerCertificate=True;"
     ports:
       - "8080:8080"
 

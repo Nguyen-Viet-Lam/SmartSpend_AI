@@ -32,8 +32,12 @@ namespace Web_Project.Services.Email
 
             if (string.IsNullOrWhiteSpace(host))
             {
-                _logger.LogError("SMTP host is missing. Cannot send email to {ToEmail}.", toEmail);
-                throw new InvalidOperationException("SMTP host is not configured.");
+                _logger.LogWarning(
+                    "SMTP host is missing. Fallback to local log mail. To: {ToEmail}, Subject: {Subject}, Body: {TextBody}",
+                    toEmail,
+                    subject,
+                    textBody);
+                return;
             }
 
             using var message = new MailMessage

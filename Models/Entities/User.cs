@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -13,6 +12,7 @@ namespace Web_Project.Models
         [MaxLength(64)]
         public string Username { get; set; } = string.Empty;
 
+        [Required]
         [MaxLength(128)]
         public string FullName { get; set; } = string.Empty;
 
@@ -35,20 +35,14 @@ namespace Web_Project.Models
         [ForeignKey(nameof(RoleId))]
         public Role Role { get; set; } = null!;
 
-        public ICollection<Content> Contents { get; set; } = new List<Content>();
+        public ICollection<Wallet> Wallets { get; set; } = new List<Wallet>();
 
-        public ICollection<Quiz> Quizzes { get; set; } = new List<Quiz>();
+        public ICollection<TransactionEntry> Transactions { get; set; } = new List<TransactionEntry>();
 
-        public ICollection<QuizAttempt> QuizAttempts { get; set; } = new List<QuizAttempt>();
+        public ICollection<Budget> Budgets { get; set; } = new List<Budget>();
 
-        public StudyStatistic? StudyStatistic { get; set; }
+        public ICollection<BudgetAlert> BudgetAlerts { get; set; } = new List<BudgetAlert>();
 
-        public ICollection<DailyUsageCounter> DailyUsageCounters { get; set; } = new List<DailyUsageCounter>();
-
-        public ICollection<ContentModeration> ReviewedContentModerations { get; set; } = new List<ContentModeration>();
-
-        public ICollection<AdminAuditLog> AdminAuditLogs { get; set; } = new List<AdminAuditLog>();
-
-        public ICollection<SystemSetting> UpdatedSystemSettings { get; set; } = new List<SystemSetting>();
+        public ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
     }
 }
