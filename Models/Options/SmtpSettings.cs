@@ -1,4 +1,4 @@
-namespace Web_Project.Models
+namespace SmartSpendAI.Models
 {
     public class SmtpSettings
     {
@@ -7,6 +7,8 @@ namespace Web_Project.Models
         public int Port { get; set; } = 587;
 
         public bool EnableSsl { get; set; } = true;
+
+        public bool UseOAuth2 { get; set; }
 
         public string Username { get; set; } = string.Empty;
 

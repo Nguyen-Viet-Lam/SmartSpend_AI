@@ -19,6 +19,19 @@
 
   const getAccessToken = () => readFromStorages(tokenStorageKey).value;
 
+  const normalizeRole = (role) => {
+    const value = String(role || "").toLowerCase();
+    if (value === "systemadmin" || value === "admin") {
+      return "Admin";
+    }
+
+    if (value === "standarduser" || value === "user") {
+      return "User";
+    }
+
+    return "Guest";
+  };
+
   const getCurrentUser = () => {
     const raw = readFromStorages(userStorageKey).value;
     if (!raw) {
@@ -37,6 +50,12 @@
     window.localStorage.removeItem(userStorageKey);
     window.sessionStorage.removeItem(tokenStorageKey);
     window.sessionStorage.removeItem(userStorageKey);
+  };
+
+  const setCurrentUser = (user, rememberMe) => {
+    const payload = JSON.stringify(user || {});
+    const storage = rememberMe ? window.localStorage : window.sessionStorage;
+    storage.setItem(userStorageKey, payload);
   };
 
   const isAuthenticated = () => Boolean(getAccessToken());
@@ -99,6 +118,9 @@
   const requireAuth = async (options) => {
     const opts = options || {};
     const requiredRoles = Array.isArray(opts.roles) ? opts.roles : [];
+    const normalizedRequiredRoles = requiredRoles
+      .map((item) => normalizeRole(item))
+      .filter((item, index, array) => item !== "Guest" && array.indexOf(item) === index);
     const onForbidden =
       typeof opts.onForbidden === "function" ? opts.onForbidden : null;
 
@@ -114,8 +136,8 @@
       return null;
     }
 
-    const role = String(me.data.role || "");
-    if (requiredRoles.length > 0 && !requiredRoles.includes(role)) {
+    const normalizedRole = normalizeRole(me.data.role);
+    if (normalizedRequiredRoles.length > 0 && !normalizedRequiredRoles.includes(normalizedRole)) {
       if (onForbidden) {
         onForbidden(me.data);
         return null;
@@ -158,7 +180,7 @@
     });
 
     document.querySelectorAll(roleSelector).forEach((el) => {
-      el.textContent = me.role || "User";
+      el.textContent = normalizeRole(me.role);
     });
 
     document.querySelectorAll(logoutSelector).forEach((el) => {
@@ -170,10 +192,16 @@
     });
   };
 
+  const logout = async () => {
+    clearSession();
+  };
+
   window.AuthClient = {
     getAccessToken,
     getCurrentUser,
+    setCurrentUser,
     clearSession,
+    logout,
     isAuthenticated,
     requireAuth,
     applyAuthVisibility,

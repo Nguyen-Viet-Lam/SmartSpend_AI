@@ -1,10 +1,10 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Web_Project.Models;
-using Web_Project.Services.Auth;
+using SmartSpendAI.Models.Dtos.Auth;
+using SmartSpendAI.Services.Auth;
 
-namespace Web_Project.Controllers
+namespace SmartSpendAI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

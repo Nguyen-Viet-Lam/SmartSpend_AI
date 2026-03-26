@@ -2,11 +2,11 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Web_Project.Models;
-using Web_Project.Security;
-using Web_Project.Services.Email;
+using SmartSpendAI.Models;
+using SmartSpendAI.Security;
+using SmartSpendAI.Services.Email;
 
-namespace Web_Project.Services.Otp
+namespace SmartSpendAI.Services.Otp
 {
     public class EmailOtpService : IEmailOtpService
     {

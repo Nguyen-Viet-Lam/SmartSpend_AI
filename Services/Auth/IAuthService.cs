@@ -1,7 +1,7 @@
-using Web_Project.Models;
-using Web_Project.Services.Otp;
+using SmartSpendAI.Models.Dtos.Auth;
+using SmartSpendAI.Services.Otp;
 
-namespace Web_Project.Services.Auth
+namespace SmartSpendAI.Services.Auth
 {
     public interface IAuthService
     {
@@ -16,40 +16,5 @@ namespace Web_Project.Services.Auth
         Task<OtpDispatchResult> RequestPasswordResetAsync(ForgotPasswordRequest request, string requestIp, CancellationToken cancellationToken);
 
         Task<SimpleServiceResult> ResetPasswordAsync(ResetPasswordRequest request, CancellationToken cancellationToken);
-    }
-
-    public sealed class LoginServiceResult
-    {
-        public bool Success { get; init; }
-
-        public int StatusCode { get; init; } = 400;
-
-        public string Message { get; init; } = string.Empty;
-
-        public LoginResponse? Response { get; init; }
-
-        public Dictionary<string, string[]> ValidationErrors { get; init; } = new();
-    }
-
-    public sealed class RegisterServiceResult
-    {
-        public bool Success { get; init; }
-
-        public bool IsConflict { get; init; }
-
-        public string Message { get; init; } = string.Empty;
-
-        public RegisterResponse? Response { get; init; }
-
-        public Dictionary<string, string[]> ValidationErrors { get; init; } = new();
-    }
-
-    public sealed class SimpleServiceResult
-    {
-        public bool Success { get; init; }
-
-        public string Message { get; init; } = string.Empty;
-
-        public Dictionary<string, string[]> ValidationErrors { get; init; } = new();
     }
 }

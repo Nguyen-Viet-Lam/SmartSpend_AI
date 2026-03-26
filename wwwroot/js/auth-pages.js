@@ -43,7 +43,9 @@
       return;
     }
 
-    window.location.href = response.role === "SystemAdmin" ? "/home/admin-dashboard.html" : "/home/dashboard.html";
+    const role = String(response.role || "").toLowerCase();
+    const isAdmin = role === "systemadmin" || role === "admin";
+    window.location.href = isAdmin ? "/home/admin-dashboard.html" : "/home/dashboard.html";
   }
 
   async function submitJson(url, payload) {

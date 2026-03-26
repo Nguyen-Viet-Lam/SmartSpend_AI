@@ -1,8 +1,8 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
-using Web_Project.Security;
+using SmartSpendAI.Security;
 
-namespace Web_Project.Controllers
+namespace SmartSpendAI.Controllers
 {
     [ApiController]
     public abstract class ApiControllerBase : ControllerBase
@@ -15,10 +15,7 @@ namespace Web_Project.Controllers
 
         protected bool IsSystemAdmin()
         {
-            return string.Equals(
-                User.FindFirstValue(ClaimTypes.Role),
-                AppRoles.SystemAdmin,
-                StringComparison.OrdinalIgnoreCase);
+            return AppRoles.IsAdmin(User.FindFirstValue(ClaimTypes.Role));
         }
     }
 }

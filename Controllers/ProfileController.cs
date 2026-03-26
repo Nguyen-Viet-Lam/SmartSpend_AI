@@ -1,10 +1,10 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Web_Project.Models.Dtos.User;
-using Web_Project.Services.Users;
+using SmartSpendAI.Models.Dtos.User;
+using SmartSpendAI.Services.Users;
 
-namespace Web_Project.Controllers
+namespace SmartSpendAI.Controllers
 {
     [ApiController]
     [Route("api/profile")]

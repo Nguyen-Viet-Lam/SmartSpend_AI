@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/css/style.css">
   <script src="/js/auth.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js" defer></script>
   <script src="/js/app-shell.js" defer></script>
   <script src="/js/finance-pages.js" defer></script>
 </head>
@@ -45,7 +46,9 @@
                   <p class="muted">Biểu đồ cột tối giản để trình bày rõ tốc độ biến động tài chính.</p>
                 </div>
               </div>
-              <div class="trend-chart" id="trendChart"></div>
+              <div class="chart-shell" id="trendChartShell">
+                <canvas id="trendChart" aria-label="Monthly income and expense chart"></canvas>
+              </div>
             </article>
             <article class="panel">
               <div class="panel-header">
@@ -55,7 +58,9 @@
                 </div>
               </div>
               <div class="donut-wrap">
-                <div class="donut" id="expenseDonut"></div>
+                <div class="donut-canvas-wrap" id="expenseDonutShell">
+                  <canvas id="expenseDonut" aria-label="Expense breakdown pie chart"></canvas>
+                </div>
                 <div class="legend-list" id="expenseLegend"></div>
               </div>
             </article>

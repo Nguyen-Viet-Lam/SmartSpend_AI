@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace Web_Project.Security
+namespace SmartSpendAI.Security
 {
     public static class PasswordHashUtility
     {

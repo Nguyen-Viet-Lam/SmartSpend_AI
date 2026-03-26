@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Web_Project.Models;
-using Web_Project.Models.Dtos.Finance;
+using SmartSpendAI.Models;
+using SmartSpendAI.Models.Dtos.Finance;
 
-namespace Web_Project.Controllers
+namespace SmartSpendAI.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]

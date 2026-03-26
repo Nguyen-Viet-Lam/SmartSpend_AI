@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Web_Project.Models.Dtos.Finance;
-using Web_Project.Services.AI;
+using SmartSpendAI.Models.Dtos.Finance;
+using SmartSpendAI.Services.AI;
 
-namespace Web_Project.Controllers
+namespace SmartSpendAI.Controllers
 {
     [Authorize]
     [Route("api/ai")]
@@ -24,8 +24,44 @@ namespace Web_Project.Controllers
                 return ValidationProblem(ModelState);
             }
 
-            var result = await _smartInputService.ParseAsync(request.Input, cancellationToken);
+            var userId = GetCurrentUserId();
+            if (userId is null)
+            {
+                return Unauthorized();
+            }
+
+            var result = await _smartInputService.ParseAsync(request.Input, userId.Value, cancellationToken);
             return Ok(result);
+        }
+
+        [HttpPost("learn-from-correction")]
+        public async Task<IActionResult> LearnFromCorrection([FromBody] LearnFromCorrectionRequest request, CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            var userId = GetCurrentUserId();
+            if (userId is null)
+            {
+                return Unauthorized();
+            }
+
+            try
+            {
+                await _smartInputService.LearnFromCorrectionAsync(
+                    request.Input,
+                    userId.Value,
+                    request.CorrectedCategoryId,
+                    cancellationToken);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+
+            return Ok(new { message = "Da cap nhat hoc may theo chinh sua cua ban." });
         }
     }
 }

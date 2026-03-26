@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Web_Project.Models
+namespace SmartSpendAI.Models
 {
     public class KeywordEntry
     {

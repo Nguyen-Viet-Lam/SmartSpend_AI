@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using Web_Project.Models;
+using SmartSpendAI.Models;
 
-namespace Web_Project.Security
+namespace SmartSpendAI.Security
 {
     public sealed class JwtSigningMaterial
     {

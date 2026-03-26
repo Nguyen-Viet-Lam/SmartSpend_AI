@@ -1,9 +1,9 @@
-using Microsoft.EntityFrameworkCore;
-using Web_Project.Models;
-using Web_Project.Models.Dtos.User;
-using Web_Project.Security;
+﻿using Microsoft.EntityFrameworkCore;
+using SmartSpendAI.Models;
+using SmartSpendAI.Models.Dtos.User;
+using SmartSpendAI.Security;
 
-namespace Web_Project.Services.Users
+namespace SmartSpendAI.Services.Users
 {
     public class UserService : IUserService
     {
@@ -38,6 +38,7 @@ namespace Web_Project.Services.Users
                     Username = user.Username,
                     FullName = user.FullName,
                     Email = user.Email,
+                    AvatarUrl = user.AvatarUrl,
                     IsLocked = user.IsLocked,
                     IsEmailVerified = user.IsEmailVerified,
                     CreatedAt = user.CreatedAt
@@ -79,6 +80,7 @@ namespace Web_Project.Services.Users
 
             user.FullName = fullName;
             user.Email = normalizedEmail;
+            user.AvatarUrl = string.IsNullOrWhiteSpace(request.AvatarUrl) ? null : request.AvatarUrl.Trim();
 
             await _dbContext.SaveChangesAsync(cancellationToken);
 
@@ -92,6 +94,7 @@ namespace Web_Project.Services.Users
                     Username = user.Username,
                     FullName = user.FullName,
                     Email = user.Email,
+                    AvatarUrl = user.AvatarUrl,
                     IsLocked = user.IsLocked,
                     IsEmailVerified = user.IsEmailVerified,
                     CreatedAt = user.CreatedAt

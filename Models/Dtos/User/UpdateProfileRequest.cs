@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Web_Project.Models.Dtos.User
+namespace SmartSpendAI.Models.Dtos.User
 {
     public class UpdateProfileRequest
     {
@@ -12,5 +12,9 @@ namespace Web_Project.Models.Dtos.User
         [EmailAddress]
         [MaxLength(256)]
         public string Email { get; set; } = string.Empty;
+
+        [Url]
+        [MaxLength(500)]
+        public string? AvatarUrl { get; set; }
     }
 }

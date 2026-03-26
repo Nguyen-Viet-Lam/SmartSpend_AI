@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Web_Project.Models;
+using SmartSpendAI.Models;
 
 #nullable disable
 
-namespace Wed_Project.Migrations
+namespace SmartSpendAI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
@@ -22,7 +22,7 @@ namespace Wed_Project.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Web_Project.Models.AuditLog", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.AuditLog", b =>
                 {
                     b.Property<int>("AuditLogId")
                         .ValueGeneratedOnAdd()
@@ -63,7 +63,7 @@ namespace Wed_Project.Migrations
                     b.ToTable("AuditLogs", (string)null);
                 });
 
-            modelBuilder.Entity("Web_Project.Models.Budget", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.Budget", b =>
                 {
                     b.Property<int>("BudgetId")
                         .ValueGeneratedOnAdd()
@@ -94,7 +94,7 @@ namespace Wed_Project.Migrations
                     b.ToTable("Budgets", (string)null);
                 });
 
-            modelBuilder.Entity("Web_Project.Models.BudgetAlert", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.BudgetAlert", b =>
                 {
                     b.Property<int>("BudgetAlertId")
                         .ValueGeneratedOnAdd()
@@ -133,7 +133,7 @@ namespace Wed_Project.Migrations
                     b.ToTable("BudgetAlerts", (string)null);
                 });
 
-            modelBuilder.Entity("Web_Project.Models.Category", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.Category", b =>
                 {
                     b.Property<int>("CategoryId")
                         .ValueGeneratedOnAdd()
@@ -246,7 +246,7 @@ namespace Wed_Project.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Web_Project.Models.EmailVerificationOtp", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.EmailVerificationOtp", b =>
                 {
                     b.Property<int>("OtpId")
                         .ValueGeneratedOnAdd()
@@ -306,7 +306,7 @@ namespace Wed_Project.Migrations
                     b.ToTable("EmailVerificationOtps");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.KeywordEntry", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.KeywordEntry", b =>
                 {
                     b.Property<int>("KeywordEntryId")
                         .ValueGeneratedOnAdd()
@@ -443,7 +443,7 @@ namespace Wed_Project.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Web_Project.Models.Role", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.Role", b =>
                 {
                     b.Property<int>("RoleId")
                         .ValueGeneratedOnAdd()
@@ -476,7 +476,7 @@ namespace Wed_Project.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Web_Project.Models.TransactionEntry", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.TransactionEntry", b =>
                 {
                     b.Property<int>("TransactionEntryId")
                         .ValueGeneratedOnAdd()
@@ -532,7 +532,7 @@ namespace Wed_Project.Migrations
                     b.ToTable("Transactions", (string)null);
                 });
 
-            modelBuilder.Entity("Web_Project.Models.TransferRecord", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.TransferRecord", b =>
                 {
                     b.Property<int>("TransferRecordId")
                         .ValueGeneratedOnAdd()
@@ -570,13 +570,17 @@ namespace Wed_Project.Migrations
                     b.ToTable("Transfers", (string)null);
                 });
 
-            modelBuilder.Entity("Web_Project.Models.User", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.User", b =>
                 {
                     b.Property<int>("UserId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
+
+                    b.Property<string>("AvatarUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -623,7 +627,45 @@ namespace Wed_Project.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.Wallet", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.UserPersonalKeyword", b =>
+                {
+                    b.Property<int>("UserPersonalKeywordId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserPersonalKeywordId"));
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Keyword")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UsageCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserPersonalKeywordId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("UserId", "Keyword")
+                        .IsUnique();
+
+                    b.ToTable("UserPersonalKeywords", (string)null);
+                });
+
+            modelBuilder.Entity("SmartSpendAI.Models.Wallet", b =>
                 {
                     b.Property<int>("WalletId")
                         .ValueGeneratedOnAdd()
@@ -662,9 +704,9 @@ namespace Wed_Project.Migrations
                     b.ToTable("Wallets", (string)null);
                 });
 
-            modelBuilder.Entity("Web_Project.Models.AuditLog", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.AuditLog", b =>
                 {
-                    b.HasOne("Web_Project.Models.User", "ActorUser")
+                    b.HasOne("SmartSpendAI.Models.User", "ActorUser")
                         .WithMany("AuditLogs")
                         .HasForeignKey("ActorUserId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -672,15 +714,15 @@ namespace Wed_Project.Migrations
                     b.Navigation("ActorUser");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.Budget", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.Budget", b =>
                 {
-                    b.HasOne("Web_Project.Models.Category", "Category")
+                    b.HasOne("SmartSpendAI.Models.Category", "Category")
                         .WithMany("Budgets")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Web_Project.Models.User", "User")
+                    b.HasOne("SmartSpendAI.Models.User", "User")
                         .WithMany("Budgets")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -691,15 +733,15 @@ namespace Wed_Project.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.BudgetAlert", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.BudgetAlert", b =>
                 {
-                    b.HasOne("Web_Project.Models.TransactionEntry", "Transaction")
+                    b.HasOne("SmartSpendAI.Models.TransactionEntry", "Transaction")
                         .WithMany()
                         .HasForeignKey("TransactionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Web_Project.Models.User", "User")
+                    b.HasOne("SmartSpendAI.Models.User", "User")
                         .WithMany("BudgetAlerts")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -710,9 +752,9 @@ namespace Wed_Project.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.EmailVerificationOtp", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.EmailVerificationOtp", b =>
                 {
-                    b.HasOne("Web_Project.Models.User", "User")
+                    b.HasOne("SmartSpendAI.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -720,9 +762,9 @@ namespace Wed_Project.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.KeywordEntry", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.KeywordEntry", b =>
                 {
-                    b.HasOne("Web_Project.Models.Category", "Category")
+                    b.HasOne("SmartSpendAI.Models.Category", "Category")
                         .WithMany("Keywords")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -731,21 +773,21 @@ namespace Wed_Project.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.TransactionEntry", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.TransactionEntry", b =>
                 {
-                    b.HasOne("Web_Project.Models.Category", "Category")
+                    b.HasOne("SmartSpendAI.Models.Category", "Category")
                         .WithMany("Transactions")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Web_Project.Models.User", "User")
+                    b.HasOne("SmartSpendAI.Models.User", "User")
                         .WithMany("Transactions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Web_Project.Models.Wallet", "Wallet")
+                    b.HasOne("SmartSpendAI.Models.Wallet", "Wallet")
                         .WithMany("Transactions")
                         .HasForeignKey("WalletId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -758,15 +800,15 @@ namespace Wed_Project.Migrations
                     b.Navigation("Wallet");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.TransferRecord", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.TransferRecord", b =>
                 {
-                    b.HasOne("Web_Project.Models.Wallet", "FromWallet")
+                    b.HasOne("SmartSpendAI.Models.Wallet", "FromWallet")
                         .WithMany("OutgoingTransfers")
                         .HasForeignKey("FromWalletId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Web_Project.Models.Wallet", "ToWallet")
+                    b.HasOne("SmartSpendAI.Models.Wallet", "ToWallet")
                         .WithMany("IncomingTransfers")
                         .HasForeignKey("ToWalletId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -777,9 +819,9 @@ namespace Wed_Project.Migrations
                     b.Navigation("ToWallet");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.User", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.User", b =>
                 {
-                    b.HasOne("Web_Project.Models.Role", "Role")
+                    b.HasOne("SmartSpendAI.Models.Role", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -788,9 +830,28 @@ namespace Wed_Project.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.Wallet", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.UserPersonalKeyword", b =>
                 {
-                    b.HasOne("Web_Project.Models.User", "User")
+                    b.HasOne("SmartSpendAI.Models.Category", "Category")
+                        .WithMany("PersonalKeywords")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SmartSpendAI.Models.User", "User")
+                        .WithMany("PersonalKeywords")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SmartSpendAI.Models.Wallet", b =>
+                {
+                    b.HasOne("SmartSpendAI.Models.User", "User")
                         .WithMany("Wallets")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -799,21 +860,23 @@ namespace Wed_Project.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.Category", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.Category", b =>
                 {
                     b.Navigation("Budgets");
 
                     b.Navigation("Keywords");
 
+                    b.Navigation("PersonalKeywords");
+
                     b.Navigation("Transactions");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.Role", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.Role", b =>
                 {
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.User", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.User", b =>
                 {
                     b.Navigation("AuditLogs");
 
@@ -821,12 +884,14 @@ namespace Wed_Project.Migrations
 
                     b.Navigation("Budgets");
 
+                    b.Navigation("PersonalKeywords");
+
                     b.Navigation("Transactions");
 
                     b.Navigation("Wallets");
                 });
 
-            modelBuilder.Entity("Web_Project.Models.Wallet", b =>
+            modelBuilder.Entity("SmartSpendAI.Models.Wallet", b =>
                 {
                     b.Navigation("IncomingTransfers");
 

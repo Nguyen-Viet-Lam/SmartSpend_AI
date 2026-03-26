@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Web_Project.Models;
-using Web_Project.Models.Dtos.Admin;
-using Web_Project.Security;
+using SmartSpendAI.Models;
+using SmartSpendAI.Models.Dtos.Admin;
+using SmartSpendAI.Security;
 
-namespace Web_Project.Controllers
+namespace SmartSpendAI.Controllers
 {
-    [Authorize(Roles = AppRoles.SystemAdmin)]
+    [Authorize(Policy = AppPolicies.AdminOnly)]
     [Route("api/admin")]
     public class AdminController : ApiControllerBase
     {
@@ -161,22 +161,24 @@ namespace Web_Project.Controllers
         }
 
         [HttpGet("audit-logs")]
-        public async Task<IActionResult> GetAuditLogs([FromQuery] int take = 50, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<IEnumerable<AdminAuditLogResponse>>> GetAuditLogs(
+            [FromQuery] int take = 50,
+            CancellationToken cancellationToken = default)
         {
             var logs = await _dbContext.AuditLogs
                 .AsNoTracking()
                 .Include(x => x.ActorUser)
                 .OrderByDescending(x => x.CreatedAt)
                 .Take(Math.Clamp(take, 1, 200))
-                .Select(x => new
+                .Select(x => new AdminAuditLogResponse
                 {
-                    auditLogId = x.AuditLogId,
-                    actor = x.ActorUser != null ? x.ActorUser.Username : "system",
-                    x.Action,
-                    x.TargetType,
-                    x.TargetId,
-                    x.Metadata,
-                    x.CreatedAt
+                    AuditLogId = x.AuditLogId,
+                    Actor = x.ActorUser != null ? x.ActorUser.Username : "system",
+                    Action = x.Action,
+                    TargetType = x.TargetType,
+                    TargetId = x.TargetId,
+                    Metadata = x.Metadata,
+                    CreatedAt = x.CreatedAt
                 })
                 .ToListAsync(cancellationToken);
 

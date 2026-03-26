@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Web_Project.Models
+namespace SmartSpendAI.Models.Dtos.Auth
 {
     public class VerifyEmailOtpRequest
     {
@@ -10,7 +10,7 @@ namespace Web_Project.Models
         public string Email { get; set; } = string.Empty;
 
         [Required]
-        [RegularExpression("^[0-9]{6}$", ErrorMessage = "OTP phải gồm 6 chữ số.")]
+        [RegularExpression("^[0-9]{6}$", ErrorMessage = "OTP ph?i g?m 6 ch? s?.")]
         public string OtpCode { get; set; } = string.Empty;
     }
 }

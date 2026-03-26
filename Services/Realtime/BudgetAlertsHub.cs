@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Web_Project.Services.Realtime
+namespace SmartSpendAI.Services.Realtime
 {
     [Authorize]
     public class BudgetAlertsHub : Hub

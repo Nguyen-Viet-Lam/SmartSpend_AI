@@ -1,20 +1,23 @@
-using System.Net;
-using System.Net.Mail;
 using System.Text;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Options;
-using Web_Project.Models;
+using MimeKit;
+using SmartSpendAI.Models;
 
-namespace Web_Project.Services.Email
+namespace SmartSpendAI.Services.Email
 {
     public class SmtpEmailSender : IEmailSender
     {
         private readonly ILogger<SmtpEmailSender> _logger;
-        private readonly SmtpSettings _smtpSettings;
+        private readonly IOptionsMonitor<SmtpSettings> _smtpOptions;
 
-        public SmtpEmailSender(IOptions<SmtpSettings> smtpOptions, ILogger<SmtpEmailSender> logger)
+        public SmtpEmailSender(
+            IOptionsMonitor<SmtpSettings> smtpOptions,
+            ILogger<SmtpEmailSender> logger)
         {
             _logger = logger;
-            _smtpSettings = smtpOptions.Value;
+            _smtpOptions = smtpOptions;
         }
 
         public async Task SendAsync(
@@ -24,47 +27,101 @@ namespace Web_Project.Services.Email
             string textBody,
             CancellationToken cancellationToken)
         {
-            var host = (_smtpSettings.Host ?? string.Empty).Trim();
-            var fromEmail = (_smtpSettings.FromEmail ?? string.Empty).Trim();
-            var fromName = (_smtpSettings.FromName ?? string.Empty).Trim();
-            var username = (_smtpSettings.Username ?? string.Empty).Trim();
-            var password = RemoveWhitespace(_smtpSettings.Password ?? string.Empty);
+            var smtpSettings = _smtpOptions.CurrentValue;
+            var host = (smtpSettings.Host ?? string.Empty).Trim();
+            var fromEmail = (smtpSettings.FromEmail ?? string.Empty).Trim();
+            var fromName = (smtpSettings.FromName ?? string.Empty).Trim();
+            var username = (smtpSettings.Username ?? string.Empty).Trim();
+            var password = RemoveWhitespace(smtpSettings.Password ?? string.Empty);
 
+            ValidateConfiguration(smtpSettings, host, fromEmail, username, password, toEmail, subject);
+
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress(fromName, fromEmail));
+            message.To.Add(MailboxAddress.Parse(toEmail));
+            message.Subject = subject;
+            message.Body = new BodyBuilder
+            {
+                HtmlBody = htmlBody,
+                TextBody = textBody
+            }.ToMessageBody();
+
+            using var smtpClient = new SmtpClient();
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var secureSocketOptions = smtpSettings.EnableSsl
+                ? SecureSocketOptions.StartTls
+                : SecureSocketOptions.Auto;
+
+            await smtpClient.ConnectAsync(host, smtpSettings.Port, secureSocketOptions, cancellationToken);
+            await smtpClient.AuthenticateAsync(username, password, cancellationToken);
+            await smtpClient.SendAsync(message, cancellationToken);
+            await smtpClient.DisconnectAsync(true, cancellationToken);
+        }
+
+        private void ValidateConfiguration(
+            SmtpSettings smtpSettings,
+            string host,
+            string fromEmail,
+            string username,
+            string password,
+            string toEmail,
+            string subject)
+        {
             if (string.IsNullOrWhiteSpace(host))
             {
-                _logger.LogWarning(
-                    "SMTP host is missing. Fallback to local log mail. To: {ToEmail}, Subject: {Subject}, Body: {TextBody}",
-                    toEmail,
-                    subject,
-                    textBody);
-                return;
+                var error = "SMTP chua cau hinh: Smtp:Host dang rong.";
+                _logger.LogError("{Error} To={ToEmail} Subject={Subject}", error, toEmail, subject);
+                throw new InvalidOperationException(error);
             }
 
-            using var message = new MailMessage
+            if (string.IsNullOrWhiteSpace(fromEmail))
             {
-                From = new MailAddress(fromEmail, fromName),
-                Subject = subject,
-                Body = htmlBody,
-                IsBodyHtml = true
-            };
-
-            message.To.Add(new MailAddress(toEmail));
-            message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(textBody, null, "text/plain"));
-
-            using var smtpClient = new SmtpClient(host, _smtpSettings.Port)
-            {
-                EnableSsl = _smtpSettings.EnableSsl,
-                DeliveryMethod = SmtpDeliveryMethod.Network,
-                UseDefaultCredentials = false
-            };
-
-            if (!string.IsNullOrWhiteSpace(username))
-            {
-                smtpClient.Credentials = new NetworkCredential(username, password);
+                var error = "SMTP chua cau hinh: Smtp:FromEmail dang rong.";
+                _logger.LogError("{Error} To={ToEmail} Subject={Subject}", error, toEmail, subject);
+                throw new InvalidOperationException(error);
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
-            await smtpClient.SendMailAsync(message, cancellationToken);
+            if (LooksLikePlaceholder(host) || LooksLikePlaceholder(fromEmail))
+            {
+                var error = "SMTP chua cau hinh: ban dang dung gia tri mau trong appsettings.Local.json.";
+                _logger.LogError("{Error} To={ToEmail} Subject={Subject}", error, toEmail, subject);
+                throw new InvalidOperationException(error);
+            }
+
+            if (smtpSettings.UseOAuth2)
+            {
+                var error = "Scope hien tai chi dung Gmail App Password. Vui long dat Smtp:UseOAuth2 = false.";
+                _logger.LogError("{Error} To={ToEmail} Subject={Subject}", error, toEmail, subject);
+                throw new InvalidOperationException(error);
+            }
+
+            if (string.IsNullOrWhiteSpace(username) || LooksLikePlaceholder(username))
+            {
+                var error = "SMTP chua cau hinh: Smtp:Username dang rong hoac placeholder.";
+                _logger.LogError("{Error} To={ToEmail} Subject={Subject}", error, toEmail, subject);
+                throw new InvalidOperationException(error);
+            }
+
+            if (string.IsNullOrWhiteSpace(password) || LooksLikePlaceholder(password))
+            {
+                var error = "SMTP chua cau hinh: Smtp:Password dang rong. Hay dung Gmail App Password 16 ky tu.";
+                _logger.LogError("{Error} To={ToEmail} Subject={Subject}", error, toEmail, subject);
+                throw new InvalidOperationException(error);
+            }
+        }
+
+        private static bool LooksLikePlaceholder(string value)
+        {
+            var normalized = (value ?? string.Empty).Trim().ToLowerInvariant();
+            if (string.IsNullOrEmpty(normalized))
+            {
+                return false;
+            }
+
+            return normalized.Contains("replace-with") ||
+                   normalized.Contains("your-email") ||
+                   normalized.Contains("your-gmail-app-password");
         }
 
         private static string RemoveWhitespace(string input)

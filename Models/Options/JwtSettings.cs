@@ -1,12 +1,12 @@
-namespace Web_Project.Models
+namespace SmartSpendAI.Models
 {
     public class JwtSettings
     {
         public const string SectionName = "Jwt";
 
-        public string Issuer { get; set; } = "WedProject";
+        public string Issuer { get; set; } = "SmartSpendAI";
 
-        public string Audience { get; set; } = "WedProjectClient";
+        public string Audience { get; set; } = "SmartSpendAIClient";
 
         public string SecretKey { get; set; } = string.Empty;
 
