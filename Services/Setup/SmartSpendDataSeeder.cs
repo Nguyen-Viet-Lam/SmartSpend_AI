@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Web_Project.Models;
-using Web_Project.Security;
+using SmartSpendAI.Models;
+using SmartSpendAI.Security;
 
-namespace Web_Project.Services.Setup
+namespace SmartSpendAI.Services.Setup
 {
     public class SmartSpendDataSeeder : ISmartSpendDataSeeder
     {

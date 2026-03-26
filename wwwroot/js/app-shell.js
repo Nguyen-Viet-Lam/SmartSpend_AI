@@ -9,8 +9,25 @@
     hubConnection: null,
   };
 
+  function normalizeRole(role) {
+    const value = String(role || "").toLowerCase();
+    if (value === "systemadmin" || value === "admin") {
+      return "Admin";
+    }
+
+    if (value === "standarduser" || value === "user") {
+      return "User";
+    }
+
+    return "Guest";
+  }
+
+  function isAdminRole(role) {
+    return normalizeRole(role) === "Admin";
+  }
+
   function getTheme() {
-    return window.localStorage.getItem(themeKey) || "dark";
+    return window.localStorage.getItem(themeKey) || "light";
   }
 
   function setTheme(theme) {
@@ -43,6 +60,15 @@
     }
 
     return source.slice(0, 2).toUpperCase();
+  }
+
+  function getAvatarMarkup(user) {
+    const avatarUrl = String(user?.avatarUrl || "").trim();
+    if (avatarUrl) {
+      return `<img class="topbar-avatar-image" src="${escapeHtml(avatarUrl)}" alt="Avatar" loading="lazy">`;
+    }
+
+    return `<span class="avatar-dot topbar-avatar-dot">${escapeHtml(getInitials(user))}</span>`;
   }
 
   function formatCurrency(value) {
@@ -159,6 +185,7 @@
       method: settings.method || "GET",
       headers,
       body,
+      credentials: "same-origin",
     });
 
     const contentType = response.headers.get("content-type") || "";
@@ -242,16 +269,19 @@
       { href: "/home/wallets.html", label: "Ví", key: "wallets" },
       { href: "/home/transactions.html", label: "Giao dịch", key: "transactions" },
       { href: "/home/budgets.html", label: "Ngân sách", key: "budgets" },
+      { href: "/home/reports.html", label: "Báo cáo", key: "reports" },
       { href: "/home/profile.html", label: "Hồ sơ", key: "profile" },
     ];
 
     const adminItems = [
       { href: "/home/admin-dashboard.html", label: "Tổng quan hệ thống", key: "admin-dashboard" },
       { href: "/home/admin-users.html", label: "Người dùng", key: "admin-users" },
+      { href: "/home/admin-categories.html", label: "Danh mục", key: "admin-categories" },
+      { href: "/home/admin-logs.html", label: "Audit logs", key: "admin-logs" },
     ];
 
     const sections = [{ title: "Người dùng", items: userItems }];
-    if (role === "SystemAdmin") {
+    if (isAdminRole(role)) {
       sections.push({ title: "Quản trị", items: adminItems });
     }
 
@@ -270,10 +300,16 @@
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h4v6H4z"></path><path d="M10 10h4v10h-4z"></path><path d="M16 5h4v15h-4z"></path></svg>',
       profile:
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 20a8 8 0 0 1 16 0"></path></svg>',
+      reports:
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"></path><path d="M7 16V9"></path><path d="M12 16V5"></path><path d="M17 16v-3"></path></svg>',
       "admin-dashboard":
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v6c0 4.6-3.2 7.8-8 8-4.8-.2-8-3.4-8-8V7l8-4z"></path><path d="M9 12l2 2 4-4"></path></svg>',
       "admin-users":
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path><circle cx="9.5" cy="7" r="3.5"></circle><path d="M20 21v-2a4 4 0 0 0-3-3.87"></path><path d="M15 4.13a3.5 3.5 0 0 1 0 5.74"></path></svg>',
+      "admin-categories":
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h7"></path><path d="M4 12h16"></path><path d="M4 18h10"></path><circle cx="15" cy="6" r="2"></circle><circle cx="18" cy="18" r="2"></circle></svg>',
+      "admin-logs":
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path><path d="M14 4v4h4"></path><path d="M8 12h8"></path><path d="M8 16h8"></path></svg>',
       guide:
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5A2.5 2.5 0 0 0 17.5 16H4z"></path><path d="M6.5 3A2.5 2.5 0 0 0 4 5.5V21l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V16"></path></svg>',
       home:
@@ -293,7 +329,7 @@
 
     const activeKey = document.body.dataset.page || "dashboard";
     const sections = getNavSections(user.role);
-    const roleLabel = user.role === "SystemAdmin" ? "Admin" : "Thành viên";
+    const roleLabel = user.roleDisplay || normalizeRole(user.role);
 
     const quickLinks = [
       { href: "/home/guide.html", label: "Hướng dẫn", key: "guide" },
@@ -333,9 +369,9 @@
       </div>`;
 
     sidebar.querySelectorAll("[data-auth-logout]").forEach((element) => {
-      element.addEventListener("click", (event) => {
+      element.addEventListener("click", async (event) => {
         event.preventDefault();
-        window.AuthClient?.clearSession?.();
+        await window.AuthClient?.logout?.();
         window.location.href = "/home/login.html";
       });
     });
@@ -346,6 +382,8 @@
     if (!topbar) {
       return;
     }
+
+    const roleLabel = user.roleDisplay || normalizeRole(user.role);
 
     topbar.innerHTML = `
       <div class="topbar-meta">
@@ -360,7 +398,7 @@
               </span>
             </a>
             <div class="topbar-pill topbar-user-pill">
-              <span class="avatar-dot topbar-avatar-dot">${escapeHtml(getInitials(user))}</span>
+              ${getAvatarMarkup(user)}
               <span class="topbar-pill-copy">
                 <strong>${escapeHtml(user.fullName || user.username || "Người dùng")}</strong>
                 <small>${escapeHtml(roleLabel)}</small>
@@ -646,7 +684,10 @@
       username: me.username || profile?.username || "user",
       fullName: profile?.fullName || window.AuthClient.getCurrentUser()?.fullName || me.username,
       email: me.email || profile?.email || "",
+      avatarUrl: profile?.avatarUrl || "",
       role: me.role || window.AuthClient.getCurrentUser()?.role || "StandardUser",
+      roleDisplay: me.roleDisplay || window.AuthClient.getCurrentUser()?.roleDisplay || normalizeRole(me.role),
+      isAdmin: Boolean(me.isAdmin),
     };
 
     renderSidebar(state.currentUser);
@@ -821,9 +862,9 @@
       });
     });
 
-    logoutButton?.addEventListener("click", (event) => {
+    logoutButton?.addEventListener("click", async (event) => {
       event.preventDefault();
-      window.AuthClient?.clearSession?.();
+      await window.AuthClient?.logout?.();
       window.location.href = "/home/login.html";
     });
 

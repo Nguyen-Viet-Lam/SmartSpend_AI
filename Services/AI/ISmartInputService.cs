@@ -1,9 +1,11 @@
-using Web_Project.Models.Dtos.Finance;
+using SmartSpendAI.Models.Dtos.Finance;
 
-namespace Web_Project.Services.AI
+namespace SmartSpendAI.Services.AI
 {
     public interface ISmartInputService
     {
-        Task<SmartInputResponse> ParseAsync(string input, CancellationToken cancellationToken);
+        Task<SmartInputResponse> ParseAsync(string input, int userId, CancellationToken cancellationToken);
+
+        Task LearnFromCorrectionAsync(string input, int userId, int correctedCategoryId, CancellationToken cancellationToken);
     }
 }

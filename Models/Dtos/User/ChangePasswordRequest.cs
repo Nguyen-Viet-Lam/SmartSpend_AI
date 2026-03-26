@@ -1,6 +1,6 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace Web_Project.Models.Dtos.User
+namespace SmartSpendAI.Models.Dtos.User
 {
     public class ChangePasswordRequest
     {

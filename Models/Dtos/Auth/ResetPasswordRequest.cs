@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Web_Project.Models
+namespace SmartSpendAI.Models.Dtos.Auth
 {
     public class ResetPasswordRequest
     {
@@ -10,7 +10,7 @@ namespace Web_Project.Models
         public string Email { get; set; } = string.Empty;
 
         [Required]
-        [RegularExpression("^[0-9]{6}$", ErrorMessage = "OTP phai gom 6 chu so.")]
+        [RegularExpression("^[0-9]{6}$", ErrorMessage = "OTP ph?i g?m 6 ch? s?.")]
         public string OtpCode { get; set; } = string.Empty;
 
         [Required]
@@ -19,7 +19,7 @@ namespace Web_Project.Models
         public string NewPassword { get; set; } = string.Empty;
 
         [Required]
-        [Compare(nameof(NewPassword), ErrorMessage = "Mat khau nhap lai khong khop.")]
+        [Compare(nameof(NewPassword), ErrorMessage = "M?t kh?u nh?p l?i không kh?p.")]
         public string ConfirmPassword { get; set; } = string.Empty;
     }
 }

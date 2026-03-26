@@ -1,4 +1,4 @@
-namespace Web_Project.Models
+namespace SmartSpendAI.Models.Dtos.Auth
 {
     public class RegisterResponse
     {

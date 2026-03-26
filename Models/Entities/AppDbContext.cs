@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Web_Project.Security;
+using SmartSpendAI.Security;
 
-namespace Web_Project.Models
+namespace SmartSpendAI.Models
 {
     public class AppDbContext : DbContext
     {
@@ -18,6 +18,7 @@ namespace Web_Project.Models
         public DbSet<Budget> Budgets => Set<Budget>();
         public DbSet<BudgetAlert> BudgetAlerts => Set<BudgetAlert>();
         public DbSet<KeywordEntry> Keywords => Set<KeywordEntry>();
+        public DbSet<UserPersonalKeyword> UserPersonalKeywords => Set<UserPersonalKeyword>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
         public DbSet<TransferRecord> Transfers => Set<TransferRecord>();
 
@@ -95,6 +96,13 @@ namespace Web_Project.Models
             modelBuilder.Entity<KeywordEntry>()
                 .HasIndex(x => x.Word);
 
+            modelBuilder.Entity<UserPersonalKeyword>()
+                .ToTable("UserPersonalKeywords");
+
+            modelBuilder.Entity<UserPersonalKeyword>()
+                .HasIndex(x => new { x.UserId, x.Keyword })
+                .IsUnique();
+
             modelBuilder.Entity<AuditLog>()
                 .ToTable("AuditLogs");
 
@@ -156,6 +164,18 @@ namespace Web_Project.Models
             modelBuilder.Entity<KeywordEntry>()
                 .HasOne(x => x.Category)
                 .WithMany(x => x.Keywords)
+                .HasForeignKey(x => x.CategoryId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserPersonalKeyword>()
+                .HasOne(x => x.User)
+                .WithMany(x => x.PersonalKeywords)
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserPersonalKeyword>()
+                .HasOne(x => x.Category)
+                .WithMany(x => x.PersonalKeywords)
                 .HasForeignKey(x => x.CategoryId)
                 .OnDelete(DeleteBehavior.Cascade);
 

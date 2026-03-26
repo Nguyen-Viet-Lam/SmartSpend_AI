@@ -2,69 +2,117 @@ using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
-using Web_Project.Models;
-using Web_Project.Models.Dtos.Finance;
+using SmartSpendAI.Models;
+using SmartSpendAI.Models.Dtos.Finance;
 
-namespace Web_Project.Services.AI
+namespace SmartSpendAI.Services.AI
 {
     public class SmartInputService : ISmartInputService
     {
         private readonly AppDbContext _dbContext;
+        private static readonly HashSet<string> NoiseKeywords =
+        [
+            "chi",
+            "thu",
+            "mua",
+            "tra",
+            "cho",
+            "va",
+            "tu",
+            "den",
+            "hom",
+            "nay",
+            "qua",
+            "tuan",
+            "thang",
+            "nam"
+        ];
 
         public SmartInputService(AppDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        public async Task<SmartInputResponse> ParseAsync(string input, CancellationToken cancellationToken)
+        public async Task<SmartInputResponse> ParseAsync(string input, int userId, CancellationToken cancellationToken)
         {
             var normalized = Normalize(input);
             var amount = ExtractAmount(normalized);
             var transactionDate = ExtractDate(normalized);
 
-            var keywords = await _dbContext.Keywords
-                .AsNoTracking()
-                .Include(x => x.Category)
-                .Where(x => x.IsActive)
-                .ToListAsync(cancellationToken);
-
             var matchedKeywords = new List<string>();
             Category? category = null;
-            var bestScore = 0;
+            var usedPersonalKeyword = false;
 
-            foreach (var keyword in keywords)
+            var personalKeywords = await _dbContext.UserPersonalKeywords
+                .AsNoTracking()
+                .Include(x => x.Category)
+                .Where(x => x.UserId == userId)
+                .OrderByDescending(x => x.UsageCount)
+                .ThenByDescending(x => x.Keyword.Length)
+                .ToListAsync(cancellationToken);
+
+            foreach (var personalKeyword in personalKeywords)
             {
-                var normalizedKeyword = Normalize(keyword.Word);
+                var normalizedKeyword = Normalize(personalKeyword.Keyword);
+                if (string.IsNullOrWhiteSpace(normalizedKeyword))
+                {
+                    continue;
+                }
+
                 if (!normalized.Contains(normalizedKeyword, StringComparison.Ordinal))
                 {
                     continue;
                 }
 
-                matchedKeywords.Add(keyword.Word);
-                if (keyword.Weight > bestScore)
+                matchedKeywords.Add(personalKeyword.Keyword);
+                category = personalKeyword.Category;
+                usedPersonalKeyword = true;
+                break;
+            }
+
+            if (!usedPersonalKeyword)
+            {
+                var keywords = await _dbContext.Keywords
+                    .AsNoTracking()
+                    .Include(x => x.Category)
+                    .Where(x => x.IsActive)
+                    .ToListAsync(cancellationToken);
+
+                var bestScore = 0;
+                foreach (var keyword in keywords)
                 {
-                    bestScore = keyword.Weight;
-                    category = keyword.Category;
+                    var normalizedKeyword = Normalize(keyword.Word);
+                    if (!normalized.Contains(normalizedKeyword, StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    matchedKeywords.Add(keyword.Word);
+                    if (keyword.Weight > bestScore)
+                    {
+                        bestScore = keyword.Weight;
+                        category = keyword.Category;
+                    }
                 }
             }
 
-            var confidence = 0.25m;
+            var confidence = 0.20m;
             if (amount > 0)
             {
-                confidence += 0.35m;
+                confidence += 0.30m;
             }
 
             if (category is not null)
             {
-                confidence += 0.25m;
+                confidence += usedPersonalKeyword ? 0.40m : 0.25m;
             }
 
             if (!transactionDate.Date.Equals(DateTime.UtcNow.Date))
             {
-                confidence += 0.10m;
+                confidence += 0.08m;
             }
 
-            confidence += Math.Min(0.15m, matchedKeywords.Count * 0.03m);
+            confidence += Math.Min(0.18m, matchedKeywords.Count * 0.03m);
 
             return new SmartInputResponse
             {
@@ -73,9 +121,90 @@ namespace Web_Project.Services.AI
                 SuggestedCategoryName = category?.Name ?? string.Empty,
                 TransactionDate = transactionDate,
                 NormalizedNote = BuildNormalizedNote(input),
-                AiConfidence = Math.Min(0.98m, confidence),
+                AiConfidence = Math.Min(0.99m, confidence),
                 MatchedKeywords = matchedKeywords
             };
+        }
+
+        public async Task LearnFromCorrectionAsync(string input, int userId, int correctedCategoryId, CancellationToken cancellationToken)
+        {
+            var categoryExists = await _dbContext.Categories
+                .AsNoTracking()
+                .AnyAsync(x => x.CategoryId == correctedCategoryId, cancellationToken);
+
+            if (!categoryExists)
+            {
+                throw new InvalidOperationException("Danh muc khong ton tai.");
+            }
+
+            var normalizedInput = Normalize(input);
+            if (string.IsNullOrWhiteSpace(normalizedInput))
+            {
+                return;
+            }
+
+            var learningKeywords = ExtractLearningKeywords(normalizedInput);
+            if (learningKeywords.Count == 0)
+            {
+                return;
+            }
+
+            var now = DateTime.UtcNow;
+            foreach (var keyword in learningKeywords)
+            {
+                var existing = await _dbContext.UserPersonalKeywords
+                    .FirstOrDefaultAsync(
+                        x => x.UserId == userId && x.Keyword == keyword,
+                        cancellationToken);
+
+                if (existing is null)
+                {
+                    _dbContext.UserPersonalKeywords.Add(new UserPersonalKeyword
+                    {
+                        UserId = userId,
+                        CategoryId = correctedCategoryId,
+                        Keyword = keyword,
+                        UsageCount = 1,
+                        CreatedAt = now,
+                        UpdatedAt = now
+                    });
+                }
+                else
+                {
+                    existing.CategoryId = correctedCategoryId;
+                    existing.UsageCount += 1;
+                    existing.UpdatedAt = now;
+                }
+            }
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        private static List<string> ExtractLearningKeywords(string normalizedInput)
+        {
+            var keywords = new HashSet<string>(StringComparer.Ordinal);
+            var compact = Regex.Replace(normalizedInput, "\\s+", " ").Trim();
+            if (compact.Length >= 3)
+            {
+                keywords.Add(compact);
+            }
+
+            foreach (var token in compact.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (token.Length < 3 || NoiseKeywords.Contains(token))
+                {
+                    continue;
+                }
+
+                if (decimal.TryParse(token, NumberStyles.Any, CultureInfo.InvariantCulture, out _))
+                {
+                    continue;
+                }
+
+                keywords.Add(token);
+            }
+
+            return keywords.Take(8).ToList();
         }
 
         private static string BuildNormalizedNote(string input)
@@ -194,8 +323,8 @@ namespace Web_Project.Services.AI
             }
 
             return builder.ToString().Normalize(NormalizationForm.FormC)
-                .Replace('đ', 'd')
-                .Replace('Đ', 'D');
+                .Replace('\u0111', 'd')
+                .Replace('\u0110', 'D');
         }
     }
 }

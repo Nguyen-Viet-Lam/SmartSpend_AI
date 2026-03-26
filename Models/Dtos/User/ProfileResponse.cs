@@ -1,4 +1,4 @@
-namespace Web_Project.Models.Dtos.User
+namespace SmartSpendAI.Models.Dtos.User
 {
     public class ProfileResponse
     {
@@ -9,6 +9,8 @@ namespace Web_Project.Models.Dtos.User
         public string FullName { get; set; } = string.Empty;
 
         public string Email { get; set; } = string.Empty;
+
+        public string? AvatarUrl { get; set; }
 
         public bool IsLocked { get; set; }
 

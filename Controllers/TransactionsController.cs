@@ -2,11 +2,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Web_Project.Models;
-using Web_Project.Models.Dtos.Finance;
-using Web_Project.Services.Realtime;
+using SmartSpendAI.Models;
+using SmartSpendAI.Models.Dtos.Finance;
+using SmartSpendAI.Services.Finance;
+using SmartSpendAI.Services.Realtime;
 
-namespace Web_Project.Controllers
+namespace SmartSpendAI.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
@@ -14,11 +15,16 @@ namespace Web_Project.Controllers
     {
         private readonly AppDbContext _dbContext;
         private readonly IHubContext<BudgetAlertsHub> _hubContext;
+        private readonly ITransactionExportService _transactionExportService;
 
-        public TransactionsController(AppDbContext dbContext, IHubContext<BudgetAlertsHub> hubContext)
+        public TransactionsController(
+            AppDbContext dbContext,
+            IHubContext<BudgetAlertsHub> hubContext,
+            ITransactionExportService transactionExportService)
         {
             _dbContext = dbContext;
             _hubContext = hubContext;
+            _transactionExportService = transactionExportService;
         }
 
         [HttpGet]
@@ -87,6 +93,40 @@ namespace Web_Project.Controllers
                 .ToListAsync(cancellationToken);
 
             return Ok(transactions);
+        }
+
+        [HttpGet("export")]
+        public async Task<IActionResult> ExportTransactions(
+            [FromQuery] DateTime? from,
+            [FromQuery] DateTime? to,
+            [FromQuery] int? walletId,
+            [FromQuery] int? categoryId,
+            [FromQuery] string? type,
+            CancellationToken cancellationToken)
+        {
+            var userId = GetCurrentUserId();
+            if (userId is null)
+            {
+                return Unauthorized();
+            }
+
+            var payload = await _transactionExportService.ExportAsync(
+                userId.Value,
+                new TransactionExportFilter
+                {
+                    From = from,
+                    To = to,
+                    WalletId = walletId,
+                    CategoryId = categoryId,
+                    Type = type
+                },
+                cancellationToken);
+
+            var fileName = $"smartspend-transactions-{DateTime.UtcNow:yyyyMMddHHmmss}.xlsx";
+            return File(
+                payload,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                fileName);
         }
 
         [HttpPost]

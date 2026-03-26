@@ -1,6 +1,6 @@
-using Web_Project.Models.Dtos.User;
+using SmartSpendAI.Models.Dtos.User;
 
-namespace Web_Project.Services.Users
+namespace SmartSpendAI.Services.Users
 {
     public interface IUserService
     {

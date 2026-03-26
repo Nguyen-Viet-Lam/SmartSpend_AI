@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Báo cáo | SmartSpend AI</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/auth.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js" defer></script>
+  <script src="/js/app-shell.js" defer></script>
+  <script src="/js/finance-pages.js" defer></script>
+</head>
+<body data-layout="app" data-page="reports" data-page-title="Báo cáo tuần/tháng và lịch sử email">
+  <div class="page-shell">
+    <aside class="app-sidebar" id="appSidebar"></aside>
+    <div class="app-frame">
+      <header class="app-topbar" id="appTopbar"></header>
+      <main class="app-content">
+        <section class="app-section">
+          <div id="reportsMessage" class="message" hidden></div>
+
+          <div class="dashboard-grid">
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <h2>Tổng hợp 7 ngày gần nhất</h2>
+                  <p class="muted" id="weeklyRange">--</p>
+                </div>
+                <button class="btn btn-secondary" type="button" id="reloadWeeklyReport">Làm mới</button>
+              </div>
+              <div class="summary-grid">
+                <div class="small-card">
+                  <div class="muted">Tổng thu</div>
+                  <strong id="weeklyIncome">--</strong>
+                </div>
+                <div class="small-card">
+                  <div class="muted">Tổng chi</div>
+                  <strong id="weeklyExpense">--</strong>
+                </div>
+                <div class="small-card">
+                  <div class="muted">Chênh lệch</div>
+                  <strong id="weeklyNet">--</strong>
+                </div>
+                <div class="small-card">
+                  <div class="muted">Số giao dịch</div>
+                  <strong id="weeklyCount">0</strong>
+                </div>
+              </div>
+              <h3>Top danh mục chi</h3>
+              <div id="weeklyTopCategories" class="legend-list"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <h2>Tổng hợp theo tháng</h2>
+                  <p class="muted" id="monthlyRange">--</p>
+                </div>
+                <div class="inline-actions">
+                  <input class="input" id="reportMonth" type="month" style="min-width:160px;">
+                  <button class="btn btn-primary" type="button" id="reloadMonthlyReport">Tải tháng</button>
+                </div>
+              </div>
+              <div class="summary-grid">
+                <div class="small-card">
+                  <div class="muted">Tổng thu</div>
+                  <strong id="monthlyIncome">--</strong>
+                </div>
+                <div class="small-card">
+                  <div class="muted">Tổng chi</div>
+                  <strong id="monthlyExpense">--</strong>
+                </div>
+                <div class="small-card">
+                  <div class="muted">Chênh lệch</div>
+                  <strong id="monthlyNet">--</strong>
+                </div>
+                <div class="small-card">
+                  <div class="muted">Số giao dịch</div>
+                  <strong id="monthlyCount">0</strong>
+                </div>
+              </div>
+              <h3>Top danh mục chi</h3>
+              <div id="monthlyTopCategories" class="legend-list"></div>
+            </article>
+          </div>
+
+          <article class="table-card">
+            <div class="table-toolbar">
+              <div>
+                <h3>Lịch sử email hệ thống</h3>
+                <p class="muted">Bao gồm email tổng hợp tuần và cảnh báo đăng nhập thiết bị lạ.</p>
+              </div>
+              <button class="btn btn-secondary" type="button" id="reloadEmailHistory">Làm mới lịch sử</button>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Loại email</th>
+                  <th>Người nhận</th>
+                  <th>Tiêu đề</th>
+                  <th>Metadata</th>
+                  <th>Thời gian gửi</th>
+                </tr>
+              </thead>
+              <tbody id="reportEmailHistoryBody"></tbody>
+            </table>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+  <div class="app-backdrop" id="appBackdrop"></div>
+</body>
+</html>

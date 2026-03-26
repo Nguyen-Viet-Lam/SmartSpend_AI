@@ -111,6 +111,7 @@
                 </div>
                 <div class="inline-actions" style="align-items:end;">
                   <button class="btn btn-primary" type="submit">Lọc dữ liệu</button>
+                  <button class="btn btn-success" type="button" id="exportTransactionsButton">Xuất Excel</button>
                   <button class="btn btn-secondary" type="button" id="resetFilters">Reset</button>
                 </div>
               </div>
@@ -129,6 +130,15 @@
               </thead>
               <tbody id="transactionTableBody"></tbody>
             </table>
+            <div class="timeline-section">
+              <div class="table-toolbar">
+                <div>
+                  <h3>Timeline giao dịch</h3>
+                  <p class="muted">Theo dõi biến động thu/chi theo dòng thời gian.</p>
+                </div>
+              </div>
+              <div id="transactionTimeline" class="timeline-list"></div>
+            </div>
           </article>
         </section>
       </main>

@@ -1,15 +1,18 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Web_Project.Models;
-using Web_Project.Security;
-using Web_Project.Services.Otp;
+using SmartSpendAI.Models;
+using SmartSpendAI.Models.Dtos.Auth;
+using SmartSpendAI.Security;
+using SmartSpendAI.Services.Email;
+using SmartSpendAI.Services.Otp;
 
-namespace Web_Project.Services.Auth
+namespace SmartSpendAI.Services.Auth
 {
     public class AuthService : IAuthService
     {
@@ -18,19 +21,25 @@ namespace Web_Project.Services.Auth
         private readonly JwtSettings _jwtSettings;
         private readonly JwtSigningMaterial _jwtSigningMaterial;
         private readonly ILogger<AuthService> _logger;
+        private readonly IEmailSender? _emailSender;
+        private readonly IHttpContextAccessor? _httpContextAccessor;
 
         public AuthService(
             AppDbContext dbContext,
             IEmailOtpService emailOtpService,
             IOptions<JwtSettings> jwtSettings,
             JwtSigningMaterial jwtSigningMaterial,
-            ILogger<AuthService> logger)
+            ILogger<AuthService> logger,
+            IEmailSender? emailSender = null,
+            IHttpContextAccessor? httpContextAccessor = null)
         {
             _dbContext = dbContext;
             _emailOtpService = emailOtpService;
             _jwtSettings = jwtSettings.Value;
             _jwtSigningMaterial = jwtSigningMaterial;
             _logger = logger;
+            _emailSender = emailSender;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<LoginServiceResult> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
@@ -117,6 +126,7 @@ namespace Web_Project.Services.Auth
                 signingCredentials: _jwtSigningMaterial.CreateSigningCredentials());
 
             _logger.LogInformation("User logged in successfully UserId={UserId}", user.UserId);
+            await TrackLoginAndNotifyIfNewDeviceAsync(user, cancellationToken);
 
             return new LoginServiceResult
             {
@@ -365,6 +375,79 @@ namespace Web_Project.Services.Auth
         {
             return exception.InnerException is SqlException sqlException &&
                    (sqlException.Number == 2601 || sqlException.Number == 2627);
+        }
+
+        private async Task TrackLoginAndNotifyIfNewDeviceAsync(User user, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var httpContext = _httpContextAccessor?.HttpContext;
+                var requestIp = httpContext?.Connection.RemoteIpAddress?.ToString() ?? "unknown-ip";
+                var userAgent = httpContext?.Request.Headers.UserAgent.ToString();
+                var sanitizedUserAgent = string.IsNullOrWhiteSpace(userAgent) ? "unknown-agent" : userAgent.Trim();
+                var deviceFingerprint = BuildDeviceFingerprint(requestIp, sanitizedUserAgent);
+
+                var previousLogin = await _dbContext.AuditLogs
+                    .AsNoTracking()
+                    .Where(x => x.ActorUserId == user.UserId && x.Action == "UserLoginSuccess")
+                    .OrderByDescending(x => x.CreatedAt)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                var isNewDevice = previousLogin is not null &&
+                                  !string.Equals(previousLogin.Metadata, deviceFingerprint, StringComparison.Ordinal);
+
+                _dbContext.AuditLogs.Add(new AuditLog
+                {
+                    ActorUserId = user.UserId,
+                    Action = "UserLoginSuccess",
+                    TargetType = "User",
+                    TargetId = user.UserId.ToString(),
+                    Metadata = deviceFingerprint,
+                    CreatedAt = DateTime.UtcNow
+                });
+
+                if (isNewDevice && _emailSender is not null)
+                {
+                    var issuedAt = DateTime.UtcNow;
+                    var subject = "Canh bao bao mat: Phat hien dang nhap thiet bi la";
+                    var textBody =
+                        $"He thong phat hien dang nhap moi vao tai khoan {user.Email}.\n" +
+                        $"Thoi gian (UTC): {issuedAt:yyyy-MM-dd HH:mm:ss}\n" +
+                        $"IP: {requestIp}\n" +
+                        $"User-Agent: {sanitizedUserAgent}\n\n" +
+                        "Neu day khong phai ban, vui long doi mat khau ngay lap tuc.";
+
+                    var htmlBody =
+                        "<p>He thong phat hien <strong>dang nhap moi</strong> vao tai khoan cua ban.</p>" +
+                        $"<p><strong>Thoi gian (UTC):</strong> {issuedAt:yyyy-MM-dd HH:mm:ss}<br/>" +
+                        $"<strong>IP:</strong> {requestIp}<br/>" +
+                        $"<strong>User-Agent:</strong> {sanitizedUserAgent}</p>" +
+                        "<p>Neu day khong phai ban, vui long doi mat khau ngay lap tuc.</p>";
+
+                    await _emailSender.SendAsync(user.Email, subject, htmlBody, textBody, cancellationToken);
+
+                    _dbContext.AuditLogs.Add(new AuditLog
+                    {
+                        ActorUserId = user.UserId,
+                        Action = "UserLoginNewDeviceAlertSent",
+                        TargetType = "User",
+                        TargetId = user.UserId.ToString(),
+                        Metadata = deviceFingerprint,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                }
+
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Could not persist login audit or send suspicious-device alert for UserId={UserId}.", user.UserId);
+            }
+        }
+
+        private static string BuildDeviceFingerprint(string requestIp, string userAgent)
+        {
+            return $"ip={requestIp};ua={userAgent}";
         }
     }
 }

@@ -4,10 +4,15 @@
     wallets: initWalletsPage,
     transactions: initTransactionsPage,
     budgets: initBudgetsPage,
+    reports: initReportsPage,
     profile: initProfilePage,
     "admin-dashboard": initAdminDashboardPage,
     "admin-users": initAdminUsersPage,
+    "admin-categories": initAdminCategoriesPage,
+    "admin-logs": initAdminLogsPage,
   };
+  let trendChartInstance = null;
+  let expenseChartInstance = null;
 
   function message(targetId, text, tone) {
     const element = document.getElementById(targetId);
@@ -46,58 +51,159 @@
   }
 
   function renderTrendChart(points) {
-    const container = document.getElementById("trendChart");
-    if (!container) {
+    const shell = document.getElementById("trendChartShell");
+    if (!shell) {
       return;
+    }
+
+    if (trendChartInstance) {
+      trendChartInstance.destroy();
+      trendChartInstance = null;
     }
 
     if (!Array.isArray(points) || points.length === 0) {
-      container.innerHTML = '<div class="empty-state">Chưa có dữ liệu đủ để dựng biểu đồ thu - chi.</div>';
+      shell.innerHTML = '<div class="empty-state">Chưa có dữ liệu đủ để dựng biểu đồ thu - chi.</div>';
       return;
     }
 
-    const max = Math.max(...points.flatMap((item) => [Number(item.income || 0), Number(item.expense || 0)]), 1);
-    container.innerHTML = points
-      .map((item) => {
-        const incomeHeight = Math.max(18, Math.round((Number(item.income || 0) / max) * 180));
-        const expenseHeight = Math.max(18, Math.round((Number(item.expense || 0) / max) * 180));
-        return `
-          <div class="trend-bar">
-            <div style="display:grid; gap:8px; align-items:end; min-height:190px;">
-              <span style="height:${incomeHeight}px; background:linear-gradient(180deg, #42d392, #21b77b);"></span>
-              <span style="height:${expenseHeight}px; background:linear-gradient(180deg, #ff9b73, #ff5b6e);"></span>
-            </div>
-            <strong>${window.SmartSpendApp.escapeHtml(item.label)}</strong>
-            <div class="muted" style="font-size:0.84rem;">Thu ${window.SmartSpendApp.formatCurrency(item.income)}<br>Chi ${window.SmartSpendApp.formatCurrency(item.expense)}</div>
-          </div>`;
-      })
-      .join("");
+    if (!window.Chart) {
+      shell.innerHTML = '<div class="empty-state">Khong the tai Chart.js. Vui long thu lai.</div>';
+      return;
+    }
+
+    shell.innerHTML = '<canvas id=\"trendChart\" aria-label=\"Monthly income and expense chart\"></canvas>';
+    const canvas = document.getElementById("trendChart");
+    if (!canvas) {
+      return;
+    }
+
+    trendChartInstance = new window.Chart(canvas, {
+      type: "bar",
+      data: {
+        labels: points.map((item) => item.label || ""),
+        datasets: [
+          {
+            label: "Thu",
+            data: points.map((item) => Number(item.income || 0)),
+            backgroundColor: "#16A34A",
+            borderRadius: 10,
+            maxBarThickness: 36,
+          },
+          {
+            label: "Chi",
+            data: points.map((item) => Number(item.expense || 0)),
+            backgroundColor: "#DC2626",
+            borderRadius: 10,
+            maxBarThickness: 36,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "top",
+          },
+          tooltip: {
+            callbacks: {
+              label(context) {
+                return `${context.dataset.label}: ${window.SmartSpendApp.formatCurrency(context.parsed.y)}`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false,
+            },
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback(value) {
+                return window.SmartSpendApp.formatCurrency(value);
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  function normalizeRoleLabel(role) {
+    const value = String(role || "").toLowerCase();
+    if (value === "systemadmin" || value === "admin") {
+      return "Admin";
+    }
+
+    if (value === "standarduser" || value === "user") {
+      return "User";
+    }
+
+    return "Guest";
   }
 
   function renderExpenseDonut(items) {
-    const donut = document.getElementById("expenseDonut");
+    const shell = document.getElementById("expenseDonutShell");
     const legend = document.getElementById("expenseLegend");
-    if (!donut || !legend) {
+    if (!shell || !legend) {
       return;
     }
 
+    if (expenseChartInstance) {
+      expenseChartInstance.destroy();
+      expenseChartInstance = null;
+    }
+
     if (!Array.isArray(items) || items.length === 0) {
-      donut.style.background = "conic-gradient(#31465f 0deg 360deg)";
+      shell.innerHTML = '<div class="empty-state">Chưa có giao dịch chi tiêu trong tháng.</div>';
       legend.innerHTML = '<div class="empty-state">Chưa có giao dịch chi tiêu trong tháng.</div>';
       return;
     }
 
-    const total = items.reduce((sum, item) => sum + Number(item.amount || 0), 0) || 1;
-    let currentAngle = 0;
-    const segments = items.map((item) => {
-      const ratio = Number(item.amount || 0) / total;
-      const nextAngle = currentAngle + ratio * 360;
-      const segment = `${item.color || "#48d1a0"} ${currentAngle}deg ${nextAngle}deg`;
-      currentAngle = nextAngle;
-      return segment;
+    if (!window.Chart) {
+      shell.innerHTML = '<div class="empty-state">Khong the tai Chart.js. Vui long thu lai.</div>';
+      return;
+    }
+
+    shell.innerHTML = '<canvas id=\"expenseDonut\" aria-label=\"Expense breakdown pie chart\"></canvas>';
+    const canvas = document.getElementById("expenseDonut");
+    if (!canvas) {
+      return;
+    }
+
+    expenseChartInstance = new window.Chart(canvas, {
+      type: "pie",
+      data: {
+        labels: items.map((item) => item.categoryName || "Khac"),
+        datasets: [
+          {
+            data: items.map((item) => Number(item.amount || 0)),
+            backgroundColor: items.map((item) => item.color || "#2563EB"),
+            borderWidth: 0,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false,
+          },
+          tooltip: {
+            callbacks: {
+              label(context) {
+                return `${context.label}: ${window.SmartSpendApp.formatCurrency(context.parsed)}`;
+              },
+            },
+          },
+        },
+      },
     });
 
-    donut.style.background = `conic-gradient(${segments.join(",")})`;
     legend.innerHTML = items
       .map(
         (item) => `
@@ -109,6 +215,36 @@
             <strong>${window.SmartSpendApp.formatCurrency(item.amount)}</strong>
           </div>`
       )
+      .join("");
+  }
+
+  function renderTransactionsTimeline(transactions) {
+    const container = document.getElementById("transactionTimeline");
+    if (!container) {
+      return;
+    }
+
+    if (!Array.isArray(transactions) || transactions.length === 0) {
+      container.innerHTML = '<div class="empty-state">Chưa có giao dịch để hiển thị dạng timeline.</div>';
+      return;
+    }
+
+    container.innerHTML = transactions
+      .map((item) => {
+        const tone = item.type === "Income" ? "income" : "expense";
+        return `
+          <article class="timeline-item ${tone}">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-top">
+                <strong>${window.SmartSpendApp.escapeHtml(item.note || "Khong co ghi chu")}</strong>
+                <span class="status-pill status-${tone === "income" ? "safe" : "danger"}">${item.type === "Income" ? "Thu" : "Chi"}</span>
+              </div>
+              <div class="muted">${window.SmartSpendApp.formatDate(item.transactionDate)} | ${window.SmartSpendApp.escapeHtml(item.walletName)} | ${window.SmartSpendApp.escapeHtml(item.categoryName)}</div>
+              <div class="timeline-amount ${tone}">${window.SmartSpendApp.formatCurrency(item.amount)}</div>
+            </div>
+          </article>`;
+      })
       .join("");
   }
 
@@ -274,8 +410,8 @@
               <div class="metric-value">${window.SmartSpendApp.formatCurrency(wallet.balance)}</div>
               <div class="muted">Tạo ngày ${window.SmartSpendApp.formatDate(wallet.createdAt)}</div>
               <div class="table-actions">
-                <button class="btn btn-ghost" data-edit-wallet="${wallet.walletId}">Sửa</button>
-                <button class="btn btn-ghost" data-delete-wallet="${wallet.walletId}">Xóa</button>
+                <button class="btn btn-secondary" data-edit-wallet="${wallet.walletId}">Sửa</button>
+                <button class="btn btn-danger" data-delete-wallet="${wallet.walletId}">Xóa</button>
               </div>
             </article>`
         )
@@ -432,6 +568,7 @@
       if (totalNode) {
         totalNode.textContent = String(transactions.length);
       }
+      renderTransactionsTimeline(transactions);
 
       if (!tableBody) {
         return;
@@ -454,8 +591,8 @@
               <td><strong>${window.SmartSpendApp.formatCurrency(item.amount)}</strong></td>
               <td>
                 <div class="table-actions">
-                  <button class="btn btn-ghost" data-edit-transaction="${item.transactionId}">Sửa</button>
-                  <button class="btn btn-ghost" data-delete-transaction="${item.transactionId}">Xóa</button>
+                  <button class="btn btn-secondary" data-edit-transaction="${item.transactionId}">Sửa</button>
+                  <button class="btn btn-danger" data-delete-transaction="${item.transactionId}">Xóa</button>
                 </div>
               </td>
             </tr>`
@@ -536,6 +673,51 @@
       await loadTransactions();
     });
 
+    document.getElementById("exportTransactionsButton")?.addEventListener("click", async () => {
+      message("transactionMessage", "", "");
+      try {
+        const token = window.AuthClient?.getAccessToken?.();
+        const query = filterForm ? buildQueryFromFilters() : "";
+        const headers = {};
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`/api/transactions/export${query ? `?${query}` : ""}`, {
+          method: "GET",
+          headers,
+          credentials: "same-origin",
+        });
+
+        if (!response.ok) {
+          let errorMessage = "Xuat Excel that bai.";
+          const contentType = response.headers.get("content-type") || "";
+          if (contentType.toLowerCase().includes("application/json")) {
+            const errorBody = await response.json().catch(() => null);
+            errorMessage = errorBody?.message || errorMessage;
+          }
+          throw new Error(errorMessage);
+        }
+
+        const blob = await response.blob();
+        const disposition = response.headers.get("content-disposition") || "";
+        const matchedName = /filename=\"?([^\";]+)\"?/i.exec(disposition);
+        const fileName = matchedName?.[1] || `smartspend-transactions-${Date.now()}.xlsx`;
+
+        const downloadUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(downloadUrl);
+        window.SmartSpendApp.showToast("Da xuat file Excel.", "success");
+      } catch (error) {
+        message("transactionMessage", error.message, "error");
+      }
+    });
+
     document.getElementById("cancelTransactionEdit")?.addEventListener("click", resetTransactionForm);
 
     await loadLookups();
@@ -587,7 +769,7 @@
                 </div>
                 <div class="table-actions">
                   ${statusBadge(item.status)}
-                  <button class="btn btn-ghost" data-delete-budget="${item.budgetId}">Xóa</button>
+                  <button class="btn btn-danger" data-delete-budget="${item.budgetId}">Xóa</button>
                 </div>
               </div>
               <div class="muted">${window.SmartSpendApp.formatCurrency(item.spentAmount)} / ${window.SmartSpendApp.formatCurrency(item.limitAmount)}</div>
@@ -646,9 +828,190 @@
     await loadBudgets();
   }
 
+  async function initReportsPage() {
+    const monthInput = document.getElementById("reportMonth");
+
+    function renderSummary(prefix, data) {
+      const mappings = {
+        Income: data.totalIncome,
+        Expense: data.totalExpense,
+        Net: data.netAmount,
+      };
+
+      Object.entries(mappings).forEach(([suffix, value]) => {
+        const node = document.getElementById(`${prefix}${suffix}`);
+        if (node) {
+          node.textContent = window.SmartSpendApp.formatCurrency(value);
+        }
+      });
+
+      const countNode = document.getElementById(`${prefix}Count`);
+      if (countNode) {
+        countNode.textContent = String(data.transactionCount || 0);
+      }
+
+      const rangeNode = document.getElementById(`${prefix}Range`);
+      if (rangeNode) {
+        rangeNode.textContent = `${window.SmartSpendApp.formatDate(data.startDate)} - ${window.SmartSpendApp.formatDate(data.endDate)}`;
+      }
+    }
+
+    function renderTopCategories(targetId, categories) {
+      const container = document.getElementById(targetId);
+      if (!container) {
+        return;
+      }
+
+      if (!Array.isArray(categories) || categories.length === 0) {
+        container.innerHTML = '<div class="empty-state">Chưa có chi tiêu để thống kê danh mục.</div>';
+        return;
+      }
+
+      container.innerHTML = categories
+        .map(
+          (item) => `
+            <div class="legend-item">
+              <div class="inline-actions">
+                <span class="legend-swatch" style="background:${window.SmartSpendApp.escapeHtml(item.color || "#48d1a0")}"></span>
+                <span>${window.SmartSpendApp.escapeHtml(item.categoryName || "Khac")}</span>
+              </div>
+              <strong>${window.SmartSpendApp.formatCurrency(item.amount)} (${Number(item.percentage || 0).toFixed(1)}%)</strong>
+            </div>`
+        )
+        .join("");
+    }
+
+    function renderEmailHistory(items) {
+      const body = document.getElementById("reportEmailHistoryBody");
+      if (!body) {
+        return;
+      }
+
+      if (!Array.isArray(items) || items.length === 0) {
+        body.innerHTML = '<tr><td colspan="5"><div class="empty-state">Chưa có lịch sử gửi email.</div></td></tr>';
+        return;
+      }
+
+      body.innerHTML = items
+        .map(
+          (item) => `
+            <tr>
+              <td>${window.SmartSpendApp.escapeHtml(item.eventType || "--")}</td>
+              <td>${window.SmartSpendApp.escapeHtml(item.recipientEmail || "--")}</td>
+              <td>${window.SmartSpendApp.escapeHtml(item.subject || "--")}</td>
+              <td>${window.SmartSpendApp.escapeHtml(item.metadata || "--")}</td>
+              <td>${window.SmartSpendApp.formatDateTime(item.sentAt)}</td>
+            </tr>`
+        )
+        .join("");
+    }
+
+    async function loadWeeklySummary() {
+      const data = await window.SmartSpendApp.api("/api/reports/weekly");
+      renderSummary("weekly", data);
+      renderTopCategories("weeklyTopCategories", data.topExpenseCategories || []);
+    }
+
+    async function loadMonthlySummary() {
+      const monthValue = monthInput?.value || "";
+      const query = monthValue ? `?month=${encodeURIComponent(`${monthValue}-01`)}` : "";
+      const data = await window.SmartSpendApp.api(`/api/reports/monthly${query}`);
+      renderSummary("monthly", data);
+      renderTopCategories("monthlyTopCategories", data.topExpenseCategories || []);
+    }
+
+    async function loadEmailHistory() {
+      const data = await window.SmartSpendApp.api("/api/reports/email-history?take=25");
+      renderEmailHistory(data || []);
+    }
+
+    const now = new Date();
+    if (monthInput && !monthInput.value) {
+      monthInput.value = now.toISOString().slice(0, 7);
+    }
+
+    document.getElementById("reloadWeeklyReport")?.addEventListener("click", async () => {
+      message("reportsMessage", "", "");
+      try {
+        await loadWeeklySummary();
+      } catch (error) {
+        message("reportsMessage", error.message, "error");
+      }
+    });
+
+    document.getElementById("reloadMonthlyReport")?.addEventListener("click", async () => {
+      message("reportsMessage", "", "");
+      try {
+        await loadMonthlySummary();
+      } catch (error) {
+        message("reportsMessage", error.message, "error");
+      }
+    });
+
+    document.getElementById("reloadEmailHistory")?.addEventListener("click", async () => {
+      message("reportsMessage", "", "");
+      try {
+        await loadEmailHistory();
+      } catch (error) {
+        message("reportsMessage", error.message, "error");
+      }
+    });
+
+    try {
+      await Promise.all([loadWeeklySummary(), loadMonthlySummary(), loadEmailHistory()]);
+    } catch (error) {
+      message("reportsMessage", error.message, "error");
+    }
+  }
+
   async function initProfilePage() {
     const profileForm = document.getElementById("profileForm");
     const passwordForm = document.getElementById("passwordForm");
+    const avatarDot = document.getElementById("profileAvatarDot");
+    const avatarImage = document.getElementById("profileAvatarImage");
+
+    function getInitials(fullName, username) {
+      const source = String(fullName || username || "User").trim();
+      const parts = source.split(/\s+/).filter(Boolean);
+      if (parts.length === 0) {
+        return "U";
+      }
+
+      if (parts.length === 1) {
+        return parts[0].slice(0, 2).toUpperCase();
+      }
+
+      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    }
+
+    function renderProfileAvatar(profile) {
+      if (!avatarDot || !avatarImage) {
+        return;
+      }
+
+      const initials = getInitials(profile.fullName, profile.username);
+      avatarDot.textContent = initials;
+
+      const avatarUrl = String(profile.avatarUrl || "").trim();
+      if (!avatarUrl) {
+        avatarImage.hidden = true;
+        avatarDot.hidden = false;
+        avatarImage.removeAttribute("src");
+        return;
+      }
+
+      avatarImage.onload = () => {
+        avatarImage.hidden = false;
+        avatarDot.hidden = true;
+      };
+
+      avatarImage.onerror = () => {
+        avatarImage.hidden = true;
+        avatarDot.hidden = false;
+      };
+
+      avatarImage.src = avatarUrl;
+    }
 
     async function loadProfile() {
       const profile = await window.SmartSpendApp.api("/api/profile");
@@ -658,6 +1021,8 @@
       profileForm.fullName.value = profile.fullName || "";
       profileForm.email.value = profile.email || "";
       profileForm.username.value = profile.username || "";
+      profileForm.avatarUrl.value = profile.avatarUrl || "";
+      renderProfileAvatar(profile);
     }
 
     profileForm?.addEventListener("submit", async (event) => {
@@ -669,8 +1034,10 @@
           body: {
             fullName: profileForm.fullName.value,
             email: profileForm.email.value,
+            avatarUrl: profileForm.avatarUrl.value || null,
           },
         });
+        await loadProfile();
         message("profileMessage", "Đã cập nhật hồ sơ.", "success");
       } catch (error) {
         message("profileMessage", error.message, "error");
@@ -733,10 +1100,10 @@
               <td>${window.SmartSpendApp.escapeHtml(user.fullName)}</td>
               <td>${window.SmartSpendApp.escapeHtml(user.username)}</td>
               <td>${window.SmartSpendApp.escapeHtml(user.email)}</td>
-              <td>${window.SmartSpendApp.escapeHtml(user.role)}</td>
+              <td>${window.SmartSpendApp.escapeHtml(normalizeRoleLabel(user.role))}</td>
               <td>${user.isLocked ? '<span class="status-pill status-danger">Locked</span>' : '<span class="status-pill status-safe">Active</span>'}</td>
               <td>
-                <button class="btn btn-ghost" data-user-action="${user.isLocked ? "unlock" : "lock"}" data-user-id="${user.userId}">
+                <button class="btn ${user.isLocked ? "btn-success" : "btn-warning"}" data-user-action="${user.isLocked ? "unlock" : "lock"}" data-user-id="${user.userId}">
                   ${user.isLocked ? "Mở khóa" : "Khóa"}
                 </button>
               </td>
@@ -760,6 +1127,245 @@
     }
 
     await loadUsers();
+  }
+
+  async function initAdminCategoriesPage() {
+    const form = document.getElementById("adminCategoryForm");
+    const body = document.getElementById("adminCategoriesBody");
+    const cancelButton = document.getElementById("cancelAdminCategoryEdit");
+    const nameInput = document.getElementById("adminCategoryName");
+    const typeSelect = document.getElementById("adminCategoryType");
+    const iconInput = document.getElementById("adminCategoryIcon");
+    const colorInput = document.getElementById("adminCategoryColor");
+    const isSystemInput = document.getElementById("adminCategoryIsSystem");
+    let editingCategoryId = null;
+    let categories = [];
+
+    function resetForm() {
+      editingCategoryId = null;
+      form?.reset();
+      if (typeSelect) {
+        typeSelect.value = "Expense";
+      }
+      if (iconInput) {
+        iconInput.value = "circle";
+      }
+      if (colorInput) {
+        colorInput.value = "#48d1a0";
+      }
+      if (isSystemInput) {
+        isSystemInput.checked = false;
+      }
+      const submitButton = form?.querySelector("button[type='submit']");
+      if (submitButton) {
+        submitButton.textContent = "Lưu danh mục";
+      }
+      if (cancelButton) {
+        cancelButton.hidden = true;
+      }
+    }
+
+    function renderTable() {
+      if (!body) {
+        return;
+      }
+
+      if (!Array.isArray(categories) || categories.length === 0) {
+        body.innerHTML = '<tr><td colspan="7"><div class="empty-state">Chưa có danh mục nào.</div></td></tr>';
+        return;
+      }
+
+      body.innerHTML = categories
+        .map(
+          (category) => `
+            <tr>
+              <td>${category.categoryId}</td>
+              <td>${window.SmartSpendApp.escapeHtml(category.name)}</td>
+              <td>${window.SmartSpendApp.escapeHtml(category.type)}</td>
+              <td>${window.SmartSpendApp.escapeHtml(category.icon || "--")}</td>
+              <td><span class="legend-swatch" style="background:${window.SmartSpendApp.escapeHtml(category.color || "#48d1a0")}"></span> ${window.SmartSpendApp.escapeHtml(category.color || "--")}</td>
+              <td>${category.isSystem ? '<span class="status-pill status-safe">System</span>' : '<span class="status-pill">Custom</span>'}</td>
+              <td>
+                <div class="table-actions">
+                  <button class="btn btn-secondary" type="button" data-edit-category="${category.categoryId}">Sửa</button>
+                  <button class="btn btn-danger" type="button" data-delete-category="${category.categoryId}">Xóa</button>
+                </div>
+              </td>
+            </tr>`
+        )
+        .join("");
+
+      body.querySelectorAll("[data-edit-category]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const categoryId = Number(button.dataset.editCategory);
+          const category = categories.find((item) => Number(item.categoryId) === categoryId);
+          if (!category || !form) {
+            return;
+          }
+
+          editingCategoryId = categoryId;
+          if (nameInput) {
+            nameInput.value = category.name || "";
+          }
+          if (typeSelect) {
+            typeSelect.value = category.type || "Expense";
+          }
+          if (iconInput) {
+            iconInput.value = category.icon || "circle";
+          }
+          if (colorInput) {
+            colorInput.value = category.color || "#48d1a0";
+          }
+          if (isSystemInput) {
+            isSystemInput.checked = Boolean(category.isSystem);
+          }
+
+          const submitButton = form.querySelector("button[type='submit']");
+          if (submitButton) {
+            submitButton.textContent = "Cập nhật danh mục";
+          }
+          if (cancelButton) {
+            cancelButton.hidden = false;
+          }
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+
+      body.querySelectorAll("[data-delete-category]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          if (!window.confirm("Bạn có chắc muốn xóa danh mục này?")) {
+            return;
+          }
+
+          try {
+            await window.SmartSpendApp.api(`/api/admin/categories/${button.dataset.deleteCategory}`, {
+              method: "DELETE",
+            });
+            window.SmartSpendApp.showToast("Đã xóa danh mục.", "success");
+            await loadCategories();
+            if (editingCategoryId === Number(button.dataset.deleteCategory)) {
+              resetForm();
+            }
+          } catch (error) {
+            message("adminCategoriesMessage", error.message, "error");
+          }
+        });
+      });
+    }
+
+    async function loadCategories() {
+      categories = await window.SmartSpendApp.api("/api/admin/categories");
+      renderTable();
+    }
+
+    form?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      message("adminCategoriesMessage", "", "");
+      try {
+        const payload = {
+          name: nameInput?.value || "",
+          type: typeSelect?.value || "",
+          icon: iconInput?.value || "",
+          color: colorInput?.value || "",
+          isSystem: Boolean(isSystemInput?.checked),
+        };
+
+        await window.SmartSpendApp.api(
+          editingCategoryId ? `/api/admin/categories/${editingCategoryId}` : "/api/admin/categories",
+          {
+            method: editingCategoryId ? "PUT" : "POST",
+            body: payload,
+          }
+        );
+
+        window.SmartSpendApp.showToast(
+          editingCategoryId ? "Đã cập nhật danh mục." : "Đã thêm danh mục mới.",
+          "success"
+        );
+        resetForm();
+        await loadCategories();
+      } catch (error) {
+        message("adminCategoriesMessage", error.message, "error");
+      }
+    });
+
+    cancelButton?.addEventListener("click", resetForm);
+    document.getElementById("reloadAdminCategories")?.addEventListener("click", async () => {
+      message("adminCategoriesMessage", "", "");
+      try {
+        await loadCategories();
+      } catch (error) {
+        message("adminCategoriesMessage", error.message, "error");
+      }
+    });
+
+    resetForm();
+    await loadCategories();
+  }
+
+  async function initAdminLogsPage() {
+    const body = document.getElementById("adminLogsBody");
+    const takeInput = document.getElementById("adminLogsTake");
+
+    function renderLogs(logs) {
+      if (!body) {
+        return;
+      }
+
+      if (!Array.isArray(logs) || logs.length === 0) {
+        body.innerHTML = '<tr><td colspan="7"><div class="empty-state">Chưa có log nào.</div></td></tr>';
+        return;
+      }
+
+      body.innerHTML = logs
+        .map(
+          (log) => `
+            <tr>
+              <td>${log.auditLogId}</td>
+              <td>${window.SmartSpendApp.escapeHtml(log.actor || "system")}</td>
+              <td>${window.SmartSpendApp.escapeHtml(log.action || "--")}</td>
+              <td>${window.SmartSpendApp.escapeHtml(log.targetType || "--")}</td>
+              <td>${window.SmartSpendApp.escapeHtml(log.targetId || "--")}</td>
+              <td>${window.SmartSpendApp.escapeHtml(log.metadata || "--")}</td>
+              <td>${window.SmartSpendApp.formatDateTime(log.createdAt)}</td>
+            </tr>`
+        )
+        .join("");
+    }
+
+    async function loadLogs() {
+      const requestedTake = Number(takeInput?.value || 50);
+      const take = Number.isFinite(requestedTake) ? Math.min(Math.max(requestedTake, 1), 200) : 50;
+      if (takeInput) {
+        takeInput.value = String(take);
+      }
+      const logs = await window.SmartSpendApp.api(`/api/admin/audit-logs?take=${take}`);
+      renderLogs(logs);
+    }
+
+    document.getElementById("reloadAdminLogs")?.addEventListener("click", async () => {
+      message("adminLogsMessage", "", "");
+      try {
+        await loadLogs();
+      } catch (error) {
+        message("adminLogsMessage", error.message, "error");
+      }
+    });
+
+    takeInput?.addEventListener("change", async () => {
+      message("adminLogsMessage", "", "");
+      try {
+        await loadLogs();
+      } catch (error) {
+        message("adminLogsMessage", error.message, "error");
+      }
+    });
+
+    try {
+      await loadLogs();
+    } catch (error) {
+      message("adminLogsMessage", error.message, "error");
+    }
   }
 
   document.addEventListener("smartspend:ready", () => {

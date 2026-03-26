@@ -1,4 +1,4 @@
-namespace Web_Project.Services.Setup
+namespace SmartSpendAI.Services.Setup
 {
     public interface ISmartSpendDataSeeder
     {

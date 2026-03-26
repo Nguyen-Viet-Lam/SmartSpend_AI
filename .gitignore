@@ -26,3 +26,5 @@ TelemetryStorageService/
 *.err
 *.out.log
 *.err.log
+
+.fake

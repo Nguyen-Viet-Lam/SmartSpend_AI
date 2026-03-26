@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Web_Project.Models
+namespace SmartSpendAI.Models
 {
     public class User
     {
@@ -19,6 +19,9 @@ namespace Web_Project.Models
         [Required]
         [MaxLength(256)]
         public string Email { get; set; } = string.Empty;
+
+        [MaxLength(500)]
+        public string? AvatarUrl { get; set; }
 
         [Required]
         [MaxLength(512)]
@@ -44,5 +47,7 @@ namespace Web_Project.Models
         public ICollection<BudgetAlert> BudgetAlerts { get; set; } = new List<BudgetAlert>();
 
         public ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
+
+        public ICollection<UserPersonalKeyword> PersonalKeywords { get; set; } = new List<UserPersonalKeyword>();
     }
 }

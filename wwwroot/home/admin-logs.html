@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Logs | SmartSpend AI</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/auth.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js" defer></script>
+  <script src="/js/app-shell.js" defer></script>
+  <script src="/js/finance-pages.js" defer></script>
+</head>
+<body data-layout="app" data-page="admin-logs" data-page-title="Audit logs hệ thống" data-required-role="SystemAdmin">
+  <div class="page-shell">
+    <aside class="app-sidebar" id="appSidebar"></aside>
+    <div class="app-frame">
+      <header class="app-topbar" id="appTopbar"></header>
+      <main class="app-content">
+        <section class="app-section">
+          <div id="adminLogsMessage" class="message" hidden></div>
+          <article class="table-card">
+            <div class="table-toolbar">
+              <div>
+                <h3>Nhật ký hệ thống</h3>
+                <p class="muted">Theo dõi thao tác quan trọng: đăng nhập lạ, quản trị, cập nhật dữ liệu.</p>
+              </div>
+              <div class="inline-actions">
+                <div class="field" style="min-width: 120px;">
+                  <label for="adminLogsTake">Số dòng</label>
+                  <input class="input" type="number" id="adminLogsTake" min="1" max="200" value="50">
+                </div>
+                <button class="btn btn-secondary" type="button" id="reloadAdminLogs">Làm mới</button>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Actor</th>
+                  <th>Action</th>
+                  <th>TargetType</th>
+                  <th>TargetId</th>
+                  <th>Metadata</th>
+                  <th>CreatedAt</th>
+                </tr>
+              </thead>
+              <tbody id="adminLogsBody"></tbody>
+            </table>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+  <div class="app-backdrop" id="appBackdrop"></div>
+</body>
+</html>

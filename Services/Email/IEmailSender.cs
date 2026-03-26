@@ -1,4 +1,4 @@
-namespace Web_Project.Services.Email
+namespace SmartSpendAI.Services.Email
 {
     public interface IEmailSender
     {

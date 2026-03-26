@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Categories | SmartSpend AI</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/auth.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js" defer></script>
+  <script src="/js/app-shell.js" defer></script>
+  <script src="/js/finance-pages.js" defer></script>
+</head>
+<body data-layout="app" data-page="admin-categories" data-page-title="Quản lý danh mục" data-required-role="SystemAdmin">
+  <div class="page-shell">
+    <aside class="app-sidebar" id="appSidebar"></aside>
+    <div class="app-frame">
+      <header class="app-topbar" id="appTopbar"></header>
+      <main class="app-content">
+        <section class="app-section">
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Danh mục mặc định và tùy chỉnh</h2>
+                <p class="muted">Admin quản lý danh mục dùng chung cho nhập giao dịch, ngân sách và AI.</p>
+              </div>
+              <button class="btn btn-secondary" type="button" id="reloadAdminCategories">Làm mới</button>
+            </div>
+
+            <form id="adminCategoryForm" class="form-stack">
+              <div id="adminCategoriesMessage" class="message" hidden></div>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="adminCategoryName">Tên danh mục</label>
+                  <input class="input" id="adminCategoryName" name="name" maxlength="100" required>
+                </div>
+                <div class="field">
+                  <label for="adminCategoryType">Loại</label>
+                  <select class="select" id="adminCategoryType" name="type" required>
+                    <option value="Expense">Expense</option>
+                    <option value="Income">Income</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="adminCategoryIcon">Icon</label>
+                  <input class="input" id="adminCategoryIcon" name="icon" maxlength="48" placeholder="vd: utensils">
+                </div>
+                <div class="field">
+                  <label for="adminCategoryColor">Màu</label>
+                  <input class="input" id="adminCategoryColor" name="color" maxlength="16" placeholder="#48d1a0">
+                </div>
+              </div>
+              <div class="inline-actions">
+                <label style="display:flex;gap:10px;align-items:center;">
+                  <input type="checkbox" id="adminCategoryIsSystem" name="isSystem">
+                  <span>Đánh dấu là danh mục hệ thống</span>
+                </label>
+              </div>
+              <div class="inline-actions">
+                <button class="btn btn-primary" type="submit">Lưu danh mục</button>
+                <button class="btn btn-secondary" type="button" id="cancelAdminCategoryEdit" hidden>Hủy chỉnh sửa</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="table-card">
+            <div class="table-toolbar">
+              <div>
+                <h3>Danh sách danh mục</h3>
+                <p class="muted">Có thể sửa/xóa danh mục chưa phát sinh dữ liệu.</p>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Tên</th>
+                  <th>Loại</th>
+                  <th>Icon</th>
+                  <th>Màu</th>
+                  <th>Nhóm</th>
+                  <th>Hành động</th>
+                </tr>
+              </thead>
+              <tbody id="adminCategoriesBody"></tbody>
+            </table>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+  <div class="app-backdrop" id="appBackdrop"></div>
+</body>
+</html>

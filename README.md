@@ -1,162 +1,87 @@
-﻿# SmartSpend AI
+# SmartSpend AI
 
-Web quản lý chi tiêu cá nhân bằng ASP.NET Core, SQL Server, JWT, OTP Gmail và SignalR.
+SmartSpend AI is an ASP.NET Core + SQL Server personal finance app for demo and product iteration.
 
-## SmartSpend hiện có gì
-- `Home / About / Guide` để giới thiệu dự án, công nghệ và cách dùng.
-- `Auth` gồm đăng ký, đăng nhập, OTP xác thực email, quên mật khẩu, đặt lại mật khẩu.
-- `User area` gồm Dashboard, Ví, Giao dịch, Ngân sách, Hồ sơ.
-- `Admin area` gồm Dashboard hệ thống và quản lý user trong bản khung hiện tại.
-- `SignalR Budget Alert` để đẩy cảnh báo khi ngân sách vượt 80% hoặc 100%.
+## Core Scope (Today)
+- Light-first UI with dark toggle persistence.
+- Wallet, transaction, budget, dashboard, profile, admin pages.
+- OTP email verification, JWT auth, SignalR budget alerts.
+- AI smart input with personal keyword learning.
+- Transaction export to Excel (`.xlsx`) with existing filters.
+- Local-only workflow (no Docker in this scope).
 
-## Bản khung hiện tại
-Repo đang được giữ theo hướng `skeleton để test và phát triển tiếp`, nghĩa là:
-- Ưu tiên page flow, database khung và phân quyền cơ bản.
-- Tạm hạ một số phần nâng cao khỏi giao diện chính để repo gọn hơn.
-- Phù hợp để chia việc nhóm backend/frontend trong các sprint tiếp theo.
+## Project Names
+- Solution: `SmartSpendAI.sln`
+- App project: `SmartSpendAI.csproj`
+- Test project: `SmartSpendAI.Tests/SmartSpendAI.Tests.csproj`
 
-## Phân quyền
-- `Guest`: xem Home / About / Guide và dùng các trang xác thực.
-- `StandardUser`: quản lý ví, giao dịch, ngân sách và hồ sơ của chính mình.
-- `SystemAdmin`: xem thống kê hệ thống, khóa/mở khóa user, quản lý keyword AI, xem audit logs.
+## Project Structure
+- `Controllers`: HTTP APIs by feature (`Auth`, `Profile`, `Finance`, `Admin`, `Dashboard`, `AI`).
+- `Services`: business logic split by domain (`Auth`, `Otp`, `Email`, `AI`, `Finance`, `User`, `Realtime`, `Setup`).
+- `Models`: `Dtos`, `Entities`, `Options`.
+- `Security`: JWT signing, role constants, password hashing, OTP purposes.
 
-## Database chính
-Schema hiện tại xoay quanh các bảng:
-- `Users`
-- `Roles`
-- `EmailVerificationOtps`
-- `Wallets`
-- `Categories`
-- `Transactions`
-- `Budgets`
-- `BudgetAlerts`
-- `Keywords`
+## Auth Flow (Core)
+- Register: `POST /api/auth/register` creates account with `IsEmailVerified=false`.
+- OTP verify: `POST /api/auth/verify-email-otp` updates `IsEmailVerified=true`.
+- Resend OTP: `POST /api/auth/resend-email-otp` for unverified users.
+- Login: `POST /api/auth/login` is blocked until email is verified.
+- Role-based access:
+- `SystemAdmin`: admin endpoints.
+- `StandardUser`: finance/profile flows.
+
+## Database
+Main tables include:
+- `Users`, `Roles`, `EmailVerificationOtps`
+- `Wallets`, `Transactions`, `Budgets`, `BudgetAlerts`, `Transfers`
+- `Categories`, `Keywords`, `UserPersonalKeywords`
 - `AuditLogs`
-- `Transfers`
 
-Migration reset mới của SmartSpend:
+Latest migrations:
 - `InitialSmartSpend`
+- `AddUserPersonalKeywords`
 
-## Project Management Files
-- File giao việc chi tiết 14 ngày:
-  [SMARTSPEND_TEAM_ASSIGNMENT_14D.md](SMARTSPEND_TEAM_ASSIGNMENT_14D.md)
-- File backlog tổng đã cập nhật link sang file giao việc:
-  [SMARTSPEND_BACKLOG.md](SMARTSPEND_BACKLOG.md)
-- File mô tả phạm vi bản khung và phần phát triển sau:
-  [SMARTSPEND_SKELETON_SCOPE.md](SMARTSPEND_SKELETON_SCOPE.md)
-
-## Chạy local
-1. Mở SQL Server và đảm bảo kết nối được tới `localhost,1433`.
-   Mật khẩu mẫu của repo là `SmartSpend123!`.
-2. Kiểm tra `ConnectionStrings:DefaultConnection` trong `appsettings.json`.
-   Mặc định project local đang dùng database `SmartSpendDb` với `Encrypt=False;TrustServerCertificate=True;` để tránh lỗi bắt tay TLS với SQL Server local và tránh đụng schema cũ.
-3. Nếu muốn ghi đè cấu hình riêng máy bạn mà không commit vào git, tạo `appsettings.Local.json` dựa trên:
-   - `appsettings.Local.example.json`
-4. Apply migration:
-```powershell
-dotnet ef database update --project Wed_Project.csproj --startup-project Wed_Project.csproj
+## Run Local (No Docker)
+1. Ensure SQL Server is available (example: `localhost,1433`).
+2. Check `ConnectionStrings:DefaultConnection` in `appsettings.json`.
+3. Optional local override:
+- create `appsettings.Local.json` from `appsettings.Local.example.json`
+4. Configure SMTP for OTP in `appsettings.Local.json` (admin sender):
+```json
+"Smtp": {
+  "Host": "smtp.your-provider.com",
+  "Port": 587,
+  "EnableSsl": true,
+  "UseOAuth2": false,
+  "Username": "admin@smartspend.local",
+  "Password": "replace-with-smtp-password",
+  "FromEmail": "admin@smartspend.local",
+  "FromName": "SmartSpend Admin"
+}
 ```
-5. Chạy web:
+5. Fill `Smtp:Host`, `Smtp:Username`, and `Smtp:Password` with your mail provider credentials.
+6. Apply migrations:
+```powershell
+dotnet ef database update --project SmartSpendAI.csproj --startup-project SmartSpendAI.csproj
+```
+7. Run app:
 ```powershell
 dotnet run --launch-profile http
 ```
-6. Mở các trang chính:
+
+## Main URLs
 - Home: `http://localhost:5176/home/index.html`
-- About: `http://localhost:5176/home/about.html`
-- Guide: `http://localhost:5176/home/guide.html`
 - Login: `http://localhost:5176/home/login.html`
 - Dashboard: `http://localhost:5176/home/dashboard.html`
+- Transactions: `http://localhost:5176/home/transactions.html`
 - Admin: `http://localhost:5176/home/admin-dashboard.html`
 
-### Auto seed trong môi trường Development
-`appsettings.Development.json` đang bật:
-- `AutoApplyMigrations = true`
-- `Enabled = true`
-- `SeedDemoData = true`
+## New Core APIs
+- `POST /api/ai/smart-input`
+- `POST /api/ai/learn-from-correction`
+- `GET /api/transactions/export`
 
-Điều đó có nghĩa là khi chạy local ở `Development`, app sẽ:
-1. Tự apply migration mới nhất.
-2. Tự tạo tài khoản admin mẫu.
-3. Tự tạo tài khoản demo user mẫu kèm ví, giao dịch, budget, alert.
-4. Nếu chưa cấu hình SMTP thật, OTP mail sẽ được log ra terminal để test local.
-
-### Tài khoản mẫu để demo
-- `SystemAdmin`
-  - Email: `admin@smartspend.local`
-  - Username: `admin.smartspend`
-  - Password: `Admin123!`
-- `StandardUser`
-  - Email: `demo@smartspend.local`
-  - Username: `demo.smartspend`
-  - Password: `Demo123!`
-
-## Page Map
-### Public
-- `/home/index.html`
-- `/home/about.html`
-- `/home/guide.html`
-
-### Auth
-- `/home/login.html`
-- `/home/register.html`
-- `/home/otp.html`
-- `/home/forgot-password.html`
-- `/home/reset-password.html`
-
-### User
-- `/home/dashboard.html`
-- `/home/wallets.html`
-- `/home/transactions.html`
-- `/home/budgets.html`
-- `/home/profile.html`
-
-### Admin
-- `/home/admin-dashboard.html`
-- `/home/admin-users.html`
-
-## Ghi chú kỹ thuật
-- Route mặc định `/` và `/home` đều redirect về `/home/index.html`.
-- Logging đã chuyển về `Console + Debug` để app chạy local không bị lỗi quyền ghi Windows Event Log.
-- Dashboard và admin pages là static HTML + JS gọi API backend.
-- Protected pages sẽ kiểm tra JWT ở phía client và các API đều được bảo vệ ở phía server.
-- Seeder chỉ bật mặc định trong `appsettings.Development.json`, còn `appsettings.json` để trạng thái tắt.
-
-## Troubleshooting
-### 1. Lỗi `file+.vscode-resource...` hoặc `DNS_PROBE_FINISHED_NXDOMAIN`
-Nguyên nhân:
-- Đây không phải URL thật của web project.
-- Đây là URL nội bộ của VS Code webview.
-
-Cách xử lý:
-1. Không mở link `file+.vscode-resource...` trên browser ngoài.
-2. Chạy app bằng `dotnet run`.
-3. Mở đúng URL localhost của project.
-
-### 2. App không lên sau khi `dotnet run`
-Kiểm tra:
-```powershell
-netstat -ano | findstr :5176
-```
-Nếu cổng bị chiếm, đổi port trong `Properties/launchSettings.json`.
-
-### 3. Lỗi SQL Server
-Kiểm tra:
-```powershell
-Test-NetConnection localhost -Port 1433
-```
-Nếu `TcpTestSucceeded = False`, hãy bật lại SQL Server service / TCP port.
-
-Nếu gặp lỗi kiểu `SQL Server requires encryption but this machine does not support it`, hãy kiểm tra connection string đang có:
-- `Encrypt=False`
-- `TrustServerCertificate=True`
-
-### 4. OTP không thấy gửi mail
-- Nếu `Smtp:Host` đang để trống, app sẽ không gửi Gmail thật mà log nội dung OTP ra terminal để test local.
-- Nếu muốn gửi Gmail thật, cấu hình `appsettings.Local.json` theo mẫu `appsettings.Local.example.json`.
-
-### 5. Sau khi đổi schema SmartSpend mà DB cũ lỗi
-Chạy lại:
-```powershell
-dotnet ef database update --project Wed_Project.csproj --startup-project Wed_Project.csproj
-```
-Nếu bạn đang giữ dữ liệu DB cũ của schema học tập trước đây thì nên backup trước khi update schema mới.
+## Notes
+- Timezone default for planning/report references: `Asia/Bangkok`.
+- Keep current URL/page map for demo stability.
+- Enterprise extensions (Hangfire, anomaly login, etc.) are out of today scope.

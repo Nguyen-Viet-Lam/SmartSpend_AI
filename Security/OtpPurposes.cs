@@ -1,4 +1,4 @@
-namespace Web_Project.Security
+namespace SmartSpendAI.Security
 {
     public static class OtpPurposes
     {

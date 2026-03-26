@@ -1,12 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Web_Project.Models
+namespace SmartSpendAI.Models.Dtos.Auth
 {
     public class RegisterRequest
     {
         [Required]
         [MaxLength(64)]
-        [RegularExpression("^[a-zA-Z0-9._-]{3,64}$", ErrorMessage = "Username chỉ gồm chữ, số, dấu chấm, gạch dưới hoặc gạch ngang.")]
+        [RegularExpression("^[a-zA-Z0-9._-]{3,64}$", ErrorMessage = "Username ch? g?m ch?, s?, d?u ch?m, g?ch du?i ho?c g?ch ngang.")]
         public string Username { get; set; } = string.Empty;
 
         [Required]
@@ -24,7 +24,7 @@ namespace Web_Project.Models
         public string Password { get; set; } = string.Empty;
 
         [Required]
-        [Compare(nameof(Password), ErrorMessage = "Mật khẩu nhập lại không khớp.")]
+        [Compare(nameof(Password), ErrorMessage = "M?t kh?u nh?p l?i kh�ng kh?p.")]
         public string ConfirmPassword { get; set; } = string.Empty;
 
         public bool AcceptTerms { get; set; }

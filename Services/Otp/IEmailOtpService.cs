@@ -1,6 +1,6 @@
-using Web_Project.Models;
+using SmartSpendAI.Models;
 
-namespace Web_Project.Services.Otp
+namespace SmartSpendAI.Services.Otp
 {
     public interface IEmailOtpService
     {
@@ -13,21 +13,5 @@ namespace Web_Project.Services.Otp
         Task<OtpDispatchResult> IssuePasswordResetOtpAsync(User user, string requestIp, CancellationToken cancellationToken);
 
         Task<OtpVerificationResult> VerifyPasswordResetOtpAsync(string email, string otpCode, CancellationToken cancellationToken);
-    }
-
-    public sealed class OtpDispatchResult
-    {
-        public bool Success { get; init; }
-
-        public string Message { get; init; } = string.Empty;
-
-        public DateTime? ExpiresAt { get; init; }
-    }
-
-    public sealed class OtpVerificationResult
-    {
-        public bool Success { get; init; }
-
-        public string Message { get; init; } = string.Empty;
     }
 }

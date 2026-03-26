@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Web_Project.Models
+namespace SmartSpendAI.Models
 {
     public class Category
     {
@@ -28,5 +28,7 @@ namespace Web_Project.Models
         public ICollection<Budget> Budgets { get; set; } = new List<Budget>();
 
         public ICollection<KeywordEntry> Keywords { get; set; } = new List<KeywordEntry>();
+
+        public ICollection<UserPersonalKeyword> PersonalKeywords { get; set; } = new List<UserPersonalKeyword>();
     }
 }

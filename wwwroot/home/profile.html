@@ -22,14 +22,15 @@
               <div class="panel-header">
                 <div>
                   <h2>Thông tin tài khoản</h2>
-                  <p class="muted">Avatar hiện là khung thiết kế chờ mapping dữ liệu thật.</p>
+                  <p class="muted">Cập nhật tên hiển thị, email và avatar từ một link ảnh.</p>
                 </div>
               </div>
               <div class="avatar-shell" style="margin-bottom:20px;">
-                <span class="avatar-dot" style="width:74px; height:74px; border-radius:24px;">AV</span>
+                <span class="avatar-dot profile-avatar-dot" id="profileAvatarDot" style="width:74px; height:74px; border-radius:24px;">AV</span>
+                <img id="profileAvatarImage" class="profile-avatar-image" alt="Avatar người dùng" hidden>
                 <div>
-                  <strong>Avatar placeholder</strong>
-                  <div class="muted">Sẽ nối dữ liệu user avatar ở bước sau.</div>
+                  <strong>Avatar cá nhân</strong>
+                  <div class="muted">Nếu để trống, hệ thống hiển thị chữ cái viết tắt.</div>
                 </div>
               </div>
               <div class="summary-grid" style="grid-template-columns:1fr; margin-bottom:18px;">
@@ -52,6 +53,10 @@
                     <label for="profileEmail">Email</label>
                     <input class="input" id="profileEmail" name="email" type="email" required>
                   </div>
+                </div>
+                <div class="field">
+                  <label for="profileAvatarUrl">Avatar URL</label>
+                  <input class="input" id="profileAvatarUrl" name="avatarUrl" type="url" placeholder="https://...">
                 </div>
                 <button class="btn btn-primary" type="submit">Cập nhật hồ sơ</button>
               </form>

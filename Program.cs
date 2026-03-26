@@ -1,18 +1,23 @@
 using System.Security.Claims;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Web_Project.Models;
-using Web_Project.Security;
-using Web_Project.Services.AI;
-using Web_Project.Services.Auth;
-using Web_Project.Services.Email;
-using Web_Project.Services.Otp;
-using Web_Project.Services.Realtime;
-using Web_Project.Services.Setup;
-using Web_Project.Services.Users;
+using SmartSpendAI.Models;
+using SmartSpendAI.Security;
+using SmartSpendAI.Services.AI;
+using SmartSpendAI.Services.Auth;
+using SmartSpendAI.Services.Email;
+using SmartSpendAI.Services.Finance;
+using SmartSpendAI.Services.Otp;
+using SmartSpendAI.Services.Realtime;
+using SmartSpendAI.Services.Reports;
+using SmartSpendAI.Services.Setup;
+using SmartSpendAI.Services.Users;
+using SmartSpendAI.Validation.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
@@ -22,7 +27,9 @@ builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
 builder.Services.AddControllers();
-builder.Services.AddHttpClient();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
+builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
 builder.Services.AddSignalR();
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, ".keys")))
@@ -31,6 +38,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));
 builder.Services.Configure<EmailOtpSettings>(builder.Configuration.GetSection("EmailOtp"));
+builder.Services.Configure<WeeklySummaryEmailSettings>(builder.Configuration.GetSection("WeeklySummaryEmail"));
 builder.Services.Configure<SmartSpendSeedOptions>(builder.Configuration.GetSection("SmartSpendSeed"));
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
 
@@ -77,20 +85,64 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(AppPolicies.UserOrAdmin, policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireAssertion(context =>
+        {
+            var role = context.User.FindFirst(ClaimTypes.Role)?.Value;
+            return AppRoles.IsUser(role) || AppRoles.IsAdmin(role);
+        });
+    });
 
+    options.AddPolicy(AppPolicies.AdminOnly, policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireAssertion(context =>
+        {
+            var role = context.User.FindFirst(ClaimTypes.Role)?.Value;
+            return AppRoles.IsAdmin(role);
+        });
+    });
+});
+
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<IEmailOtpService, EmailOtpService>();
+builder.Services.AddScoped<ITransactionExportService, TransactionExportService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ISmartInputService, SmartInputService>();
 builder.Services.AddScoped<ISmartSpendDataSeeder, SmartSpendDataSeeder>();
+builder.Services.AddHostedService<WeeklySummaryEmailHostedService>();
 
 var app = builder.Build();
 
 if (jwtSigningMaterial.IsAsymmetric && jwtSigningMaterial.IsEphemeral)
 {
     app.Logger.LogWarning("JWT asymmetric mode is using an auto-generated in-memory key pair. Tokens will be invalid after restart.");
+}
+
+var smtpSettings = app.Services.GetRequiredService<IOptions<SmtpSettings>>().Value;
+if (string.IsNullOrWhiteSpace(smtpSettings.Host))
+{
+    app.Logger.LogWarning("SMTP host is empty. OTP email cannot be delivered. Set Smtp:Host/Smtp:Username/Smtp:Password in appsettings.Local.json.");
+}
+else if (smtpSettings.UseOAuth2)
+{
+    app.Logger.LogWarning("Local OTP flow currently supports SMTP username/password mode. Set Smtp:UseOAuth2=false unless OAuth2 sender is implemented.");
+}
+else if (string.IsNullOrWhiteSpace(smtpSettings.Username) ||
+         string.IsNullOrWhiteSpace(smtpSettings.Password) ||
+         string.IsNullOrWhiteSpace(smtpSettings.FromEmail) ||
+         LooksLikePlaceholder(smtpSettings.Username) ||
+         LooksLikePlaceholder(smtpSettings.Password) ||
+         LooksLikePlaceholder(smtpSettings.FromEmail))
+{
+    app.Logger.LogWarning("SMTP credentials are missing. Configure Smtp:Username, Smtp:Password, and Smtp:FromEmail.");
 }
 
 if (!app.Environment.IsDevelopment())
@@ -162,4 +214,17 @@ static async Task ApplyMigrationsWithRecoveryAsync(
         await dbContext.Database.EnsureDeletedAsync();
         await dbContext.Database.MigrateAsync();
     }
+}
+
+static bool LooksLikePlaceholder(string? value)
+{
+    var normalized = (value ?? string.Empty).Trim().ToLowerInvariant();
+    if (string.IsNullOrEmpty(normalized))
+    {
+        return false;
+    }
+
+    return normalized.Contains("replace-with") ||
+           normalized.Contains("your-email") ||
+           normalized.Contains("your-gmail-app-password");
 }
