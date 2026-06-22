@@ -84,7 +84,7 @@ namespace SmartSpendAI.Services.Email
 
             if (LooksLikePlaceholder(host) || LooksLikePlaceholder(fromEmail))
             {
-                var error = "SMTP chưa cấu hình: bạn đang dùng giá trị mẫu trong appsettings.Local.json.";
+                var error = "SMTP chưa cấu hình: bạn đang dùng giá trị mẫu trong appsettings.json.";
                 _logger.LogError("{Error} To={ToEmail} Subject={Subject}", error, toEmail, subject);
                 throw new InvalidOperationException(error);
             }

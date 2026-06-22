@@ -44,9 +44,7 @@ Latest migrations:
 ## Run Local (No Docker)
 1. Ensure SQL Server is available (example: `.\SQLEXPRESS`).
 2. Check `ConnectionStrings:DefaultConnection` in `appsettings.json`.
-3. Optional local override:
-- create `appsettings.Local.json` from `appsettings.Local.example.json`
-4. Configure SMTP for OTP in `appsettings.Local.json` (admin sender):
+3. Configure SMTP for OTP directly in `appsettings.json` (admin sender):
 ```json
 "Smtp": {
   "Host": "smtp.your-provider.com",
@@ -59,12 +57,12 @@ Latest migrations:
   "FromName": "SmartSpend Admin"
 }
 ```
-5. Fill `Smtp:Host`, `Smtp:Username`, and `Smtp:Password` with your mail provider credentials.
-6. Apply migrations:
+4. Fill `Smtp:Host`, `Smtp:Username`, and `Smtp:Password` with your mail provider credentials.
+5. Apply migrations:
 ```powershell
 dotnet ef database update --project SmartSpendAI.csproj --startup-project SmartSpendAI.csproj
 ```
-7. Run app:
+6. Run app:
 ```powershell
 dotnet run --launch-profile http
 ```

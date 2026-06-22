@@ -45,6 +45,8 @@ SmartSpend AI la ung dung quan ly chi tieu ca nhan xay dung bang ASP.NET Core + 
 ### 3.2 Finance core
 - CRUD vi o [Controllers/WalletsController.cs](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\Controllers\WalletsController.cs#L12)
 - CRUD giao dich o [Controllers/TransactionsController.cs](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\Controllers\TransactionsController.cs#L16)
+- Chuyen tien giua cac vi o [Controllers/WalletsController.cs](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\Controllers\WalletsController.cs#L193)
+- Loc giao dich theo ngay, vi, danh muc va loai giao dich o [Controllers/TransactionsController.cs](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\Controllers\TransactionsController.cs#L21)
 - CRUD ngan sach o [Controllers/BudgetsController.cs](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\Controllers\BudgetsController.cs#L11)
 - CRUD danh muc o [Controllers/CategoriesController.cs](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\Controllers\CategoriesController.cs#L10)
 - Export Excel o [Services/Finance/TransactionExportService.cs](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\Services\Finance\TransactionExportService.cs#L8)
@@ -68,7 +70,7 @@ SmartSpend AI la ung dung quan ly chi tieu ca nhan xay dung bang ASP.NET Core + 
 - Goi y ngan sach ca nhan hoa o [Services/AI/SmartReminderService.cs](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\Services\AI\SmartReminderService.cs#L447)
 
 ### 3.5 Admin va seeding
-- Admin dashboard, user, log, category management o [Controllers/AdminController.cs](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\Controllers\AdminController.cs#L12) va [Controllers/AdminCategoriesController.cs](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\Controllers\AdminCategoriesController.cs#L12)
+- Admin dashboard, user, log, keyword va category management o [Controllers/AdminController.cs](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\Controllers\AdminController.cs#L12) va [Controllers/AdminCategoriesController.cs](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\Controllers\AdminCategoriesController.cs#L12)
 - Seed du lieu demo o [Services/Setup/SmartSpendDataSeeder.cs](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\Services\Setup\SmartSpendDataSeeder.cs#L8)
 
 ### 3.6 Email, OTP, background job
@@ -121,10 +123,12 @@ SmartSpend AI la ung dung quan ly chi tieu ca nhan xay dung bang ASP.NET Core + 
 - Home o [wwwroot/home/index.html](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\wwwroot\home\index.html)
 - Login o [wwwroot/home/login.html](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\wwwroot\home\login.html)
 - Register o [wwwroot/home/register.html](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\wwwroot\home\register.html)
+- OTP o [wwwroot/home/otp.html](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\wwwroot\home\otp.html)
 - Dashboard o [wwwroot/home/dashboard.html](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\wwwroot\home\dashboard.html)
 - Transactions o [wwwroot/home/transactions.html](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\wwwroot\home\transactions.html)
 - Budgets o [wwwroot/home/budgets.html](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\wwwroot\home\budgets.html)
 - Wallets o [wwwroot/home/wallets.html](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\wwwroot\home\wallets.html)
+- Profile o [wwwroot/home/profile.html](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\wwwroot\home\profile.html)
 - Reports o [wwwroot/home/reports.html](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\wwwroot\home\reports.html)
 - Admin pages o [wwwroot/home/admin-dashboard.html](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\wwwroot\home\admin-dashboard.html), [wwwroot/home/admin-users.html](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\wwwroot\home\admin-users.html), [wwwroot/home/admin-categories.html](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\wwwroot\home\admin-categories.html), [wwwroot/home/admin-logs.html](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\wwwroot\home\admin-logs.html)
 
@@ -254,4 +258,18 @@ Du an da co day du cac phan chinh de lam bao cao mon cong nghe phan mem:
 - Co backend, frontend, validation, test
 - Co AI mo rong
 - Co phan chia cong viec ro rang cho nhom 4 nguoi
+
+## 15. Hinh anh thuc te da chup
+
+Phan nay tong hop mot so hinh anh thuc te cua he thong da duoc chup tu server local de dua vao bao cao.
+
+![Hinh 15.1. Trang chu](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\report_assets\generated\home_real2.png)
+
+![Hinh 15.2. Dang nhap](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\report_assets\generated\login_real2.png)
+
+![Hinh 15.3. Dang ky](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\report_assets\generated\register_real2.png)
+
+![Hinh 15.4. Dashboard tai chinh](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\report_assets\generated\dashboard_real.png)
+
+![Hinh 15.5. Ho so ca nhan](C:\Users\ASUS\Downloads\QuanLyChiTieuCaNhan\report_assets\generated\profile_real2.png)
 

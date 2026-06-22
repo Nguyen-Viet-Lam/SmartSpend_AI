@@ -20,7 +20,6 @@ using SmartSpendAI.Services.Users;
 using SmartSpendAI.Validation.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
@@ -130,7 +129,7 @@ if (jwtSigningMaterial.IsAsymmetric && jwtSigningMaterial.IsEphemeral)
 var smtpSettings = app.Services.GetRequiredService<IOptions<SmtpSettings>>().Value;
 if (string.IsNullOrWhiteSpace(smtpSettings.Host))
 {
-    app.Logger.LogWarning("SMTP chưa có Host. Không thể gửi email OTP. Hãy cấu hình Smtp:Host, Smtp:Username và Smtp:Password trong appsettings.Local.json.");
+    app.Logger.LogWarning("SMTP chưa có Host. Không thể gửi email OTP. Hãy cấu hình Smtp:Host, Smtp:Username và Smtp:Password trong appsettings.json.");
 }
 else if (smtpSettings.UseOAuth2)
 {
@@ -143,7 +142,7 @@ else if (string.IsNullOrWhiteSpace(smtpSettings.Username) ||
          LooksLikePlaceholder(smtpSettings.Password) ||
          LooksLikePlaceholder(smtpSettings.FromEmail))
 {
-    app.Logger.LogWarning("Thiếu thông tin xác thực SMTP. Hãy cấu hình Smtp:Username, Smtp:Password và Smtp:FromEmail.");
+    app.Logger.LogWarning("Thiếu thông tin xác thực SMTP. Hãy cấu hình Smtp:Username, Smtp:Password và Smtp:FromEmail trong appsettings.json.");
 }
 
 if (!app.Environment.IsDevelopment())
